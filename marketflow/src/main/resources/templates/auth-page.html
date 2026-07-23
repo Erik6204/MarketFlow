@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MarketFlow</title>
+</head>
+<body>
+    <main>
+        <h1>MarketFlow</h1>
+        <p>Войдите в аккаунт или создайте новый.</p>
+
+        <nav>
+            <form th:action="@{/login}" action="/login" method="get">
+                <button type="submit">Войти</button>
+            </form>
+
+            <form th:action="@{/register}" action="/register" method="get">
+                <button type="submit">Зарегистрироваться</button>
+            </form>
+        </nav>
+    </main>
+</body>
+</html>
