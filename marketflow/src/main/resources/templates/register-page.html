@@ -4,12 +4,70 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Регистрация | MarketFlow</title>
+    <link rel="stylesheet" th:href="@{/css/auth.css}" href="/css/auth.css">
 </head>
 <body>
-    <main>
-        <h1>Регистрация</h1>
-        <p>Форма регистрации будет добавлена следующим этапом.</p>
-        <a th:href="@{/}" href="/">Вернуться назад</a>
+    <main class="page-shell">
+        <header class="topbar">
+            <a class="brand brand-dark" th:href="@{/}" href="/">MarketFlow</a>
+            <a class="back-link" th:href="@{/}" href="/">← Вернуться назад</a>
+        </header>
+
+        <section class="centered-section" aria-labelledby="register-title">
+            <div class="form-content">
+                <p class="eyebrow">Новый аккаунт</p>
+                <h1 id="register-title">Регистрация</h1>
+                <p class="supporting-text">Заполните данные будущего профиля.</p>
+
+                <form class="auth-form"
+                      th:action="@{/register/succ}"
+                      action="/register/succ"
+                      method="post">
+                    <div class="field">
+                        <label for="display_name">Имя</label>
+                        <input id="display_name"
+                               name="display_name"
+                               type="text"
+                               maxlength="100"
+                               autocomplete="name"
+                               placeholder="Алексей"
+                               required>
+                    </div>
+
+                    <div class="field">
+                        <label for="email">Email</label>
+                        <input id="email"
+                               name="email"
+                               type="email"
+                               maxlength="320"
+                               autocomplete="email"
+                               placeholder="alex@example.com"
+                               required>
+                    </div>
+
+                    <div class="field">
+                        <label for="password_hash">Пароль</label>
+                        <input id="password_hash"
+                               name="password_hash"
+                               type="password"
+                               minlength="8"
+                               maxlength="100"
+                               autocomplete="new-password"
+                               placeholder="Минимум 8 символов"
+                               required>
+                    </div>
+
+                    <button class="button button-primary" type="submit">
+                        Создать аккаунт
+                    </button>
+                </form>
+
+                <p class="footer-link">
+                    Уже зарегистрированы?
+                    <a th:href="@{/login}" href="/login">Войти</a>
+                </p>
+            </div>
+        </section>
     </main>
 </body>
 </html>

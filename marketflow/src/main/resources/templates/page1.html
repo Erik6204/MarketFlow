@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Регистрация завершена | MarketFlow</title>
+    <link rel="stylesheet" th:href="@{/css/auth.css}" href="/css/auth.css">
+</head>
+<body>
+    <main class="result-page result-success">
+        <section class="result-content">
+            <div class="status-mark" aria-hidden="true">✓</div>
+            <p class="eyebrow">Готово</p>
+            <h1>Вы успешно зарегистрировались</h1>
+            <p class="supporting-text">
+                Аккаунт
+                <strong th:text="${userdto != null ? userdto.email : 'пользователя'}">
+                    пользователя
+                </strong>
+                создан.
+            </p>
+            <a class="button button-primary" th:href="@{/}" href="/">
+                Перейти на главную
+            </a>
+            <a class="back-link result-back" th:href="@{/}" href="/">← Вернуться назад</a>
+        </section>
+    </main>
+</body>
+</html>

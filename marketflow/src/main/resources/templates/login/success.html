@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Профиль | MarketFlow</title>
+    <link rel="stylesheet" th:href="@{/css/auth.css}" href="/css/auth.css">
+</head>
+<body>
+    <main class="page-shell">
+        <header class="topbar">
+            <a class="brand brand-dark" th:href="@{/}" href="/">MarketFlow</a>
+            <a class="back-link" th:href="@{/login}" href="/login">← Вернуться назад</a>
+        </header>
+
+        <section class="profile-section" aria-labelledby="profile-title">
+            <div>
+                <p class="eyebrow">Личный кабинет</p>
+                <h1 id="profile-title">Профиль пользователя</h1>
+                <p class="supporting-text">Вы успешно вошли в MarketFlow.</p>
+            </div>
+
+            <dl class="profile-list">
+                <div>
+                    <dt>Имя</dt>
+                    <dd th:text="${displayName}">Имя пользователя</dd>
+                </div>
+                <div>
+                    <dt>Email</dt>
+                    <dd th:text="${email}">Email пользователя</dd>
+                </div>
+                <div>
+                    <dt>Статус</dt>
+                    <dd th:text="${status}">ACTIVE</dd>
+                </div>
+            </dl>
+
+            <a class="button button-secondary profile-exit" th:href="@{/}" href="/">
+                Выйти на главную
+            </a>
+        </section>
+    </main>
+</body>
+</html>

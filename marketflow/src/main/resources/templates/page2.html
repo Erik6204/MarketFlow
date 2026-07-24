@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Пользователь существует | MarketFlow</title>
+    <link rel="stylesheet" th:href="@{/css/auth.css}" href="/css/auth.css">
+</head>
+<body>
+    <main class="result-page result-warning">
+        <section class="result-content">
+            <div class="status-mark" aria-hidden="true">!</div>
+            <p class="eyebrow">Регистрация не выполнена</p>
+            <h1>Такой пользователь уже существует</h1>
+            <p class="supporting-text">Войдите в существующий аккаунт или используйте другой email.</p>
+            <a class="button button-primary" th:href="@{/}" href="/">
+                Перейти на главную
+            </a>
+            <a class="back-link result-back" th:href="@{/}" href="/">← Вернуться назад</a>
+        </section>
+    </main>
+</body>
+</html>

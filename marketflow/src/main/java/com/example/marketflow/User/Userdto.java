@@ -1,37 +1,27 @@
 package com.example.marketflow.User;
 
-import java.time.Instant;
-
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
+@NoArgsConstructor
 public class Userdto {
 
-    @NotBlank(message = "id не должен быть пустым")
-    private Long id;
-
     @NotBlank(message = "email не должен быть пустым")
-    @Email(message = "email должен быть ")
+    @Email(message = "некорректный формат email")
+    @Size(max = 320, message = "email не должен быть длиннее 320 символов")
     private String email;
 
     @NotBlank(message = "пароль не должен быть пустым")
+    @Size(min = 8, max = 100, message = "пароль должен содержать от 8 до 100 символов")
     private String password_hash;
 
-    @NotBlank(message = "ФИО не должен быть пустым")
+    @NotBlank(message = "имя не должно быть пустым")
+    @Size(max = 100, message = "имя не должно быть длиннее 100 символов")
     private String display_name;
-
-    @NotBlank(message = "status не должен быть пустым")
-    private UserStatus status;
-
-    @NotBlank(message = "не должен быть пустым")
-    private Instant createdAt;
-
-    @NotBlank(message = "не должен быть пустым")
-    private Instant updatedAt;
 }

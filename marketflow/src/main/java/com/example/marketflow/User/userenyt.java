@@ -13,30 +13,31 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "users")
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class userenyt {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable=false)
+    @Column(nullable = false, length = 320)
     private String email;
 
-    @Column(nullable=false)
-    private String password_hash;
+    @Column(name = "password_hash", nullable = false, length = 255)
+    private String passwordHash;
 
-    @Column(nullable=false)
-    private String display_name;
+    @Column(name = "display_name", nullable = false, length = 100)
+    private String displayName;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable=false)
-    private UserStatus status;
+    @Column(nullable = false, length = 30)
+    private UserStatus status = UserStatus.ACTIVE;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -46,5 +47,9 @@ public class userenyt {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
-
+    public userenyt(String email, String passwordHash, String displayName) {
+        this.email = email;
+        this.passwordHash = passwordHash;
+        this.displayName = displayName;
+    }
 }
