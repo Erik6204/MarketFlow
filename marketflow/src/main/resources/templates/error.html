@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Ошибка | MarketFlow</title>
+    <link rel="stylesheet" th:href="@{/css/market.css}" href="/css/market.css">
+</head>
+<body>
+<header class="market-header">
+    <a class="market-brand" href="/">MarketFlow</a>
+</header>
+<main class="result-wrap">
+    <section class="result-panel">
+        <div class="result-mark danger" th:text="${status != null ? status : '!'}">!</div>
+        <p class="eyebrow">Ошибка запроса</p>
+        <h1 th:text="${error != null ? error : 'Что-то пошло не так'}">Что-то пошло не так</h1>
+        <p class="muted" th:text="${message != null and !#strings.isEmpty(message) ? message : 'Не удалось выполнить операцию.'}">
+            Не удалось выполнить операцию.
+        </p>
+        <div class="result-actions">
+            <button class="button button-primary" type="button" onclick="history.back()">Вернуться назад</button>
+            <a class="button button-secondary" href="/">На главную</a>
+        </div>
+    </section>
+</main>
+</body>
+</html>

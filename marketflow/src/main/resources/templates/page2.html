@@ -3,21 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Пользователь существует | MarketFlow</title>
-    <link rel="stylesheet" th:href="@{/css/auth.css}" href="/css/auth.css">
+    <title>Товар | MarketFlow</title>
+    <link rel="stylesheet" th:href="@{/css/market.css}" href="/css/market.css">
 </head>
 <body>
-    <main class="result-page result-warning">
-        <section class="result-content">
-            <div class="status-mark" aria-hidden="true">!</div>
-            <p class="eyebrow">Регистрация не выполнена</p>
-            <h1>Такой пользователь уже существует</h1>
-            <p class="supporting-text">Войдите в существующий аккаунт или используйте другой email.</p>
-            <a class="button button-primary" th:href="@{/}" href="/">
-                Перейти на главную
-            </a>
-            <a class="back-link result-back" th:href="@{/}" href="/">← Вернуться назад</a>
-        </section>
-    </main>
+<header class="market-header">
+    <a class="market-brand" href="../catalog">MarketFlow</a>
+    <nav class="market-nav" aria-label="Основная навигация">
+        <a href="../catalog">Каталог</a>
+        <a href="../cart">Корзина</a>
+        <a href="../account/cards">Карты</a>
+        <a href="/account">Профиль</a>
+    </nav>
+</header>
+
+<main class="market-main">
+    <section class="detail-layout">
+        <div class="detail-media">MarketFlow</div>
+        <div class="detail-copy">
+            <p class="eyebrow">Карточка товара</p>
+            <h1>Информация о товаре</h1>
+            <p class="detail-description" th:text="${product}">
+                Подробное описание выбранного товара.
+            </p>
+            <div class="form-actions">
+                <form id="add-product-form" method="post">
+                    <button class="button button-primary" type="submit">Добавить в корзину</button>
+                </form>
+                <a class="button button-secondary" href="../catalog">Вернуться в каталог</a>
+            </div>
+        </div>
+    </section>
+</main>
+
+<script>
+    const productId = window.location.pathname.split('/').filter(Boolean).pop();
+    document.getElementById('add-product-form').action = `../cart/items/${productId}`;
+</script>
 </body>
 </html>

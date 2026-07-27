@@ -1,7 +1,5 @@
 package com.example.marketflow.controller;
 
-import java.util.Optional;
-
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -9,21 +7,20 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
-import com.example.marketflow.Repository.UserRepository;
-import com.example.marketflow.User.UserMapper;
 import com.example.marketflow.User.Userdto;
 import com.example.marketflow.User.logindto;
-import com.example.marketflow.User.userenyt;
+import com.example.marketflow.service.AuthService;
 
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 
 @Controller
 public class Authcontroller {
 
-    private final UserRepository userRepository;
+    private final AuthService authservice;
 
-    public Authcontroller(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public Authcontroller(AuthService authservice) {
+        this.authservice = authservice;
     }
 
     @GetMapping("/")
@@ -42,44 +39,21 @@ public class Authcontroller {
     }
 
     @PostMapping("/register/succ")
-    public String saver(
-            @Valid @ModelAttribute Userdto userDto,
-            BindingResult bindingResult
-    ) {
-        if (bindingResult.hasErrors()) {
-            return "register-page";
-        }
-
-        if (userRepository.existsByEmailIgnoreCase(userDto.getEmail())) {
-            return "page2";
-        }
-
-        userRepository.save(UserMapper.convert(userDto));
-        return "page1";
+    public String saver(@Valid @ModelAttribute Userdto userDto,BindingResult bindingResult) 
+    {
+        return authservice.funtction1(userDto,bindingResult);
     }
 
     @PostMapping("/login/success")
-    public String loginsuc(
-            @Valid @ModelAttribute logindto log,
-            BindingResult bindingResult,
-            Model model
-    ) {
-        if (bindingResult.hasErrors()) {
-            return "login-page";
-        }
-
-        Optional<userenyt> user = userRepository.findByEmailIgnoreCaseAndPasswordHash(
-                log.getEmail(),
-                log.getPassword_hash()
-        );
-
-        if (user.isEmpty()) {
-            return "login/unsuccess";
-        }
-
-        model.addAttribute("email", user.get().getEmail());
-        model.addAttribute("displayName", user.get().getDisplayName());
-        model.addAttribute("status", user.get().getStatus());
-        return "login/success";
+    public String loginsuc(@Valid @ModelAttribute logindto log,BindingResult bindingResult,Model model,HttpSession session)
+    {
+        return authservice.function2(log, bindingResult, model, session);
     }
+
+    @GetMapping("/account")
+    public String acc(HttpSession session,Model model){
+        return authservice.function3(session, model);
+    }
+
+    
 }

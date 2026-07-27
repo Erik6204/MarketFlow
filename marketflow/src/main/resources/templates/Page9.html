@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Карты | MarketFlow</title>
+    <link rel="stylesheet" th:href="@{/css/market.css}" href="/css/market.css">
+</head>
+<body>
+<header class="market-header">
+    <a class="market-brand" href="../catalog">MarketFlow</a>
+    <nav class="market-nav" aria-label="Основная навигация">
+        <a href="../catalog">Каталог</a>
+        <a href="../cart">Корзина</a>
+        <a href="./cards" aria-current="page">Карты</a>
+        <a href="/account">Профиль</a>
+    </nav>
+</header>
+
+<main class="market-main">
+    <div class="page-heading">
+        <div>
+            <p class="eyebrow">Способ оплаты</p>
+            <h1>Мои карты</h1>
+            <p class="muted">Карты, доступные текущему пользователю.</p>
+        </div>
+        <a class="button button-primary" href="./cards/add">Добавить карту</a>
+    </div>
+
+    <section class="card-list" th:if="${cards != null and !cards.isEmpty()}">
+        <article class="payment-card" th:each="card : ${cards}">
+            <div>
+                <small>MarketFlow Card</small>
+                <strong th:text="${card.active ? 'Активна' : 'Неактивна'}">Активна</strong>
+            </div>
+            <div>
+                <small>Баланс</small>
+                <strong th:text="${card.balance + ' ₽'}">0.00 ₽</strong>
+            </div>
+            <div class="payment-card-number" th:text="${card.maskedNumber}">
+                **** **** **** 0000
+            </div>
+        </article>
+    </section>
+
+    <section class="empty-state" th:if="${cards == null or cards.isEmpty()}">
+        <h2>Нет привязанных карт</h2>
+        <p class="muted">Добавьте карту, чтобы подготовить оплату заказа.</p>
+    </section>
+</main>
+</body>
+</html>

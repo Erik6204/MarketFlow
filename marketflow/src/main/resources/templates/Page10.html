@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Добавить карту | MarketFlow</title>
+    <link rel="stylesheet" href="/css/market.css">
+</head>
+<body>
+<header class="market-header">
+    <a class="market-brand" href="../../catalog">MarketFlow</a>
+    <nav class="market-nav" aria-label="Основная навигация">
+        <a href="../../catalog">Каталог</a>
+        <a href="../../cart">Корзина</a>
+        <a href="../cards" aria-current="page">Карты</a>
+        <a href="/account">Профиль</a>
+    </nav>
+</header>
+
+<main class="form-wrap">
+    <section class="form-shell">
+        <p class="eyebrow">Новый способ оплаты</p>
+        <h1>Добавить карту</h1>
+        <p class="muted">Заполните реквизиты учебного платёжного счёта.</p>
+
+        <form class="market-form" action="../cards" method="post">
+            <input type="hidden" name="userid" value="0">
+
+            <div class="field">
+                <label for="cardtoken">Токен карты</label>
+                <input id="cardtoken"
+                       name="cardtoken"
+                       type="text"
+                       maxlength="100"
+                       autocomplete="off"
+                       placeholder="card_demo_12345"
+                       required>
+            </div>
+
+            <div class="field">
+                <label for="maskedNumber">Маскированный номер</label>
+                <input id="maskedNumber"
+                       name="maskedNumber"
+                       type="text"
+                       maxlength="30"
+                       inputmode="numeric"
+                       placeholder="**** **** **** 1234"
+                       required>
+            </div>
+
+            <div class="field">
+                <label for="balance">Баланс</label>
+                <input id="balance"
+                       name="balance"
+                       type="number"
+                       min="0"
+                       step="0.01"
+                       placeholder="10000.00"
+                       required>
+            </div>
+
+            <div class="form-actions">
+                <button class="button button-primary" type="submit">Сохранить карту</button>
+                <a class="button button-secondary" href="../cards">Отмена</a>
+            </div>
+        </form>
+    </section>
+</main>
+</body>
+</html>

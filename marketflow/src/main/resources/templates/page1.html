@@ -3,27 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Регистрация завершена | MarketFlow</title>
-    <link rel="stylesheet" th:href="@{/css/auth.css}" href="/css/auth.css">
+    <title>Каталог | MarketFlow</title>
+    <link rel="stylesheet" th:href="@{/css/market.css}" href="/css/market.css">
 </head>
 <body>
-    <main class="result-page result-success">
-        <section class="result-content">
-            <div class="status-mark" aria-hidden="true">✓</div>
-            <p class="eyebrow">Готово</p>
-            <h1>Вы успешно зарегистрировались</h1>
-            <p class="supporting-text">
-                Аккаунт
-                <strong th:text="${userdto != null ? userdto.email : 'пользователя'}">
-                    пользователя
-                </strong>
-                создан.
-            </p>
-            <a class="button button-primary" th:href="@{/}" href="/">
-                Перейти на главную
-            </a>
-            <a class="back-link result-back" th:href="@{/}" href="/">← Вернуться назад</a>
-        </section>
-    </main>
+<header class="market-header">
+    <a class="market-brand" href="./catalog">MarketFlow</a>
+    <nav class="market-nav" aria-label="Основная навигация">
+        <a href="./catalog" aria-current="page">Каталог</a>
+        <a href="./cart">Корзина</a>
+        <a href="./account/cards">Карты</a>
+        <a href="/account">Профиль</a>
+    </nav>
+</header>
+
+<main class="market-main">
+    <div class="page-heading">
+        <div>
+            <p class="eyebrow">MarketFlow</p>
+            <h1>Каталог товаров</h1>
+            <p class="muted">Актуальные предложения продавцов.</p>
+        </div>
+        <a class="button button-secondary" href="./cart">Перейти в корзину</a>
+    </div>
+
+    <section class="product-grid" th:if="${products != null and !products.isEmpty()}">
+        <article class="product-card"
+                 th:each="product : ${products}"
+                 th:if="${product.active}">
+            <div class="product-media">
+                <img th:if="${product.url != null and !#strings.isEmpty(product.url)}"
+                     th:src="${product.url}"
+                     th:alt="${product.name}">
+                <div class="product-placeholder"
+                     th:unless="${product.url != null and !#strings.isEmpty(product.url)}">
+                    Нет изображения
+                </div>
+            </div>
+
+            <div class="product-content">
+                <h2 th:text="${product.name}">Название товара</h2>
+                <p class="product-description" th:text="${product.description}">
+                    Описание товара
+                </p>
+                <div class="price-row">
+                    <span class="price" th:text="${product.price + ' ₽'}">0.00 ₽</span>
+                    <span class="stock" th:text="${'В наличии: ' + product.quantity}">В наличии: 0</span>
+                </div>
+                <div class="card-actions">
+                    <a class="button button-secondary"
+                       th:href="@{./products/{id}(id=${product.id})}"
+                       href="./products/1">
+                        Подробнее
+                    </a>
+                    <form th:action="@{./cart/items/{id}(id=${product.id})}"
+                          action="./cart/items/1"
+                          method="post">
+                        <button class="button button-primary" type="submit">В корзину</button>
+                    </form>
+                </div>
+            </div>
+        </article>
+    </section>
+
+    <section class="empty-state" th:if="${products == null or products.isEmpty()}">
+        <h2>Каталог пока пуст</h2>
+        <p class="muted">Товары появятся здесь после добавления продавцами.</p>
+    </section>
+</main>
 </body>
 </html>

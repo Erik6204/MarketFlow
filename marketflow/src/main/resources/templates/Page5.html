@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Количество товара | MarketFlow</title>
+    <link rel="stylesheet" th:href="@{/css/market.css}" href="/css/market.css">
+</head>
+<body>
+<header class="market-header">
+    <a class="market-brand" href="../../../catalog">MarketFlow</a>
+</header>
+<main class="result-wrap">
+    <section class="result-panel">
+        <div class="result-mark info">i</div>
+        <p class="eyebrow">Позиция корзины</p>
+        <h1>Количество проверено</h1>
+        <p class="muted">
+            Текущее количество:
+            <strong th:text="${count}">1</strong>
+        </p>
+        <div class="result-actions">
+            <a class="button button-primary" href="../../../cart">Вернуться в корзину</a>
+            <a class="button button-secondary" href="../../../catalog">Каталог</a>
+        </div>
+    </section>
+</main>
+</body>
+</html>

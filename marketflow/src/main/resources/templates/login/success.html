@@ -35,9 +35,20 @@
                 </div>
             </dl>
 
-            <a class="button button-secondary profile-exit" th:href="@{/}" href="/">
-                Выйти на главную
-            </a>
+            <div class="action-stack">
+                <a class="button button-primary" href="/account/current/catalog">
+                    Открыть каталог
+                </a>
+                <a class="button button-secondary" href="/account/current/cart">
+                    Открыть корзину
+                </a>
+                <a class="button button-secondary" href="/account/current/account/cards">
+                    Управление картами
+                </a>
+                <a class="button button-secondary profile-exit" th:href="@{/}" href="/">
+                    Выйти на главную
+                </a>
+            </div>
         </section>
     </main>
 </body>

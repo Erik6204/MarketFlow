@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Оформление | MarketFlow</title>
+    <link rel="stylesheet" th:href="@{/css/market.css}" href="/css/market.css">
+</head>
+<body>
+<header class="market-header">
+    <a class="market-brand" href="./catalog">MarketFlow</a>
+    <nav class="market-nav" aria-label="Основная навигация">
+        <a href="./catalog">Каталог</a>
+        <a href="./cart">Корзина</a>
+        <a href="./account/cards">Карты</a>
+        <a href="/account">Профиль</a>
+    </nav>
+</header>
+
+<main class="market-main">
+    <div class="page-heading">
+        <div>
+            <p class="eyebrow">Оформление заказа</p>
+            <h1>Проверка суммы</h1>
+            <p class="muted">Итог рассчитан по товарам текущей корзины.</p>
+        </div>
+        <a class="button button-secondary" href="./cart">Вернуться в корзину</a>
+    </div>
+
+    <section class="summary-band">
+        <div>
+            <div class="data-label">Итого к оплате</div>
+            <div class="summary-total" th:text="${sum + ' ₽'}">0.00 ₽</div>
+        </div>
+        <a class="button button-primary" href="./account/cards">Выбрать карту</a>
+    </section>
+</main>
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Корзина | MarketFlow</title>
+    <link rel="stylesheet" th:href="@{/css/market.css}" href="/css/market.css">
+</head>
+<body>
+<header class="market-header">
+    <a class="market-brand" href="./catalog">MarketFlow</a>
+    <nav class="market-nav" aria-label="Основная навигация">
+        <a href="./catalog">Каталог</a>
+        <a href="./cart" aria-current="page">Корзина</a>
+        <a href="./account/cards">Карты</a>
+        <a href="/account">Профиль</a>
+    </nav>
+</header>
+
+<main class="market-main">
+    <div class="page-heading">
+        <div>
+            <p class="eyebrow">Ваш выбор</p>
+            <h1>Корзина</h1>
+            <p class="muted">Проверьте выбранные позиции перед оформлением.</p>
+        </div>
+        <a class="button button-secondary" href="./catalog">Добавить товары</a>
+    </div>
+
+    <section class="data-panel" th:if="${cartitemsentity != null}">
+        <div class="data-row">
+            <div>
+                <div class="data-label">Товар</div>
+                <div class="data-value" th:text="${'ID ' + cartitemsentity.productid}">ID товара</div>
+            </div>
+            <div>
+                <div class="data-label">Количество</div>
+                <div class="data-value" th:text="${cartitemsentity.quantity}">1</div>
+            </div>
+            <div class="card-actions">
+                <form th:action="@{./cart/items/{id}/quantity(id=${cartitemsentity.id})}" method="post">
+                    <button class="button button-secondary" type="submit">Проверить количество</button>
+                </form>
+                <form th:action="@{./cart/items/{id}/select(id=${cartitemsentity.id})}" method="post">
+                    <input type="hidden" name="choise" th:value="${!cartitemsentity.selected}">
+                    <button class="button button-secondary" type="submit"
+                            th:text="${cartitemsentity.selected ? 'Снять выбор' : 'Выбрать'}">
+                        Выбрать
+                    </button>
+                </form>
+                <form th:action="@{./cart/items/{id}/delete(id=${cartitemsentity.id})}" method="post">
+                    <button class="button button-danger" type="submit">Удалить</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <section class="empty-state" th:if="${cartitemsentity == null}">
+        <h2>Корзина пуста</h2>
+        <p class="muted">Добавьте товары из каталога, чтобы продолжить.</p>
+    </section>
+
+    <div class="summary-band" th:if="${cartitemsentity != null}">
+        <div>
+            <div class="data-label">Следующий шаг</div>
+            <div class="data-value">Расчёт итоговой суммы</div>
+        </div>
+        <a class="button button-primary" href="./checkout">Перейти к оформлению</a>
+    </div>
+</main>
+</body>
+</html>
