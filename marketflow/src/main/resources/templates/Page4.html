@@ -27,40 +27,41 @@
         <a class="button button-secondary" href="./catalog">Добавить товары</a>
     </div>
 
-    <section class="data-panel" th:if="${cartitemsentity != null}">
-        <div class="data-row">
+    <section class="data-panel" th:if="${cartItems != null and !cartItems.isEmpty()}">
+        <div class="data-row" th:each="item : ${cartItems}">
             <div>
                 <div class="data-label">Товар</div>
-                <div class="data-value" th:text="${'ID ' + cartitemsentity.productid}">ID товара</div>
+                <div class="data-value" th:text="${'ID ' + item.productid}">ID товара</div>
             </div>
             <div>
                 <div class="data-label">Количество</div>
-                <div class="data-value" th:text="${cartitemsentity.quantity}">1</div>
+                <div class="data-value" th:text="${item.quantity}">1</div>
             </div>
             <div class="card-actions">
-                <form th:action="@{./cart/items/{id}/quantity(id=${cartitemsentity.id})}" method="post">
-                    <button class="button button-secondary" type="submit">Проверить количество</button>
+                <form th:action="@{/account/cart/items/{id}/quantity(id=${item.id})}" method="post">
+                    <input type="number" name="quantity" min="1" th:value="${item.quantity}" required>
+                    <button class="button button-secondary" type="submit">Изменить количество</button>
                 </form>
-                <form th:action="@{./cart/items/{id}/select(id=${cartitemsentity.id})}" method="post">
-                    <input type="hidden" name="choise" th:value="${!cartitemsentity.selected}">
+                <form th:action="@{/account/cart/items/{id}/select(id=${item.id})}" method="post">
+                    <input type="hidden" name="choise" th:value="${!item.selected}">
                     <button class="button button-secondary" type="submit"
-                            th:text="${cartitemsentity.selected ? 'Снять выбор' : 'Выбрать'}">
+                            th:text="${item.selected ? 'Снять выбор' : 'Выбрать'}">
                         Выбрать
                     </button>
                 </form>
-                <form th:action="@{./cart/items/{id}/delete(id=${cartitemsentity.id})}" method="post">
+                <form th:action="@{/account/cart/items/{id}/delete(id=${item.id})}" method="post">
                     <button class="button button-danger" type="submit">Удалить</button>
                 </form>
             </div>
         </div>
     </section>
 
-    <section class="empty-state" th:if="${cartitemsentity == null}">
+    <section class="empty-state" th:if="${cartItems == null or cartItems.isEmpty()}">
         <h2>Корзина пуста</h2>
         <p class="muted">Добавьте товары из каталога, чтобы продолжить.</p>
     </section>
 
-    <div class="summary-band" th:if="${cartitemsentity != null}">
+    <div class="summary-band" th:if="${cartItems != null and !cartItems.isEmpty()}">
         <div>
             <div class="data-label">Следующий шаг</div>
             <div class="data-value">Расчёт итоговой суммы</div>

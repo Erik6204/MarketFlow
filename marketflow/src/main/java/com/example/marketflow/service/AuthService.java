@@ -33,11 +33,11 @@ public class AuthService {
         }
 
         if (userRepository.existsByEmailIgnoreCase(userDto.getEmail())) {
-            return "page2";
+            return "register-duplicate";
         }
 
         userRepository.save(UserMapper.convert(userDto));
-        return "page1";
+        return "register-success";
     }
     @Transactional
     public String function2(@Valid @ModelAttribute logindto log,BindingResult bindingResult,Model model,HttpSession session
@@ -70,7 +70,7 @@ public class AuthService {
             return "redirect:/login";
         }
         model.addAttribute("email",es.getEmail());
-        model.addAttribute("displayname",es.getDisplayName());
+        model.addAttribute("displayName",es.getDisplayName());
         model.addAttribute("status",es.getStatus());
         return "login/success";
     }

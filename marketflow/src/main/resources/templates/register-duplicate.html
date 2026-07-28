@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Пользователь уже существует | MarketFlow</title>
+    <link rel="stylesheet" th:href="@{/css/auth.css}" href="/css/auth.css">
+</head>
+<body>
+<main class="page-shell">
+    <header class="topbar">
+        <a class="brand brand-dark" href="/">MarketFlow</a>
+        <a class="back-link" href="/">← На главную</a>
+    </header>
+    <section class="centered-section">
+        <div class="form-content">
+            <div class="inline-alert" role="alert">Пользователь с таким email уже существует.</div>
+            <p class="eyebrow">Регистрация</p>
+            <h1>Аккаунт уже существует</h1>
+            <p class="supporting-text">Попробуйте войти или зарегистрируйтесь с другим email.</p>
+            <div class="action-stack">
+                <a class="button button-primary" href="/login">Войти</a>
+                <a class="button button-secondary" href="/register">Другой email</a>
+            </div>
+        </div>
+    </section>
+</main>
+</body>
+</html>

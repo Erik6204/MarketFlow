@@ -19,15 +19,24 @@
 
 <main class="market-main">
     <section class="detail-layout">
-        <div class="detail-media">MarketFlow</div>
+        <div class="detail-media">
+            <img th:if="${product.url != null and !#strings.isEmpty(product.url)}"
+                 th:src="${product.url}"
+                 th:alt="${product.name}">
+            <span th:unless="${product.url != null and !#strings.isEmpty(product.url)}">MarketFlow</span>
+        </div>
         <div class="detail-copy">
             <p class="eyebrow">Карточка товара</p>
-            <h1>Информация о товаре</h1>
-            <p class="detail-description" th:text="${product}">
+            <h1 th:text="${product.name}">Информация о товаре</h1>
+            <p class="detail-description" th:text="${product.description}">
                 Подробное описание выбранного товара.
             </p>
+            <div class="price-row">
+                <span class="price" th:text="${product.price + ' ₽'}">0.00 ₽</span>
+                <span class="stock" th:text="${'В наличии: ' + product.quantity}">В наличии: 0</span>
+            </div>
             <div class="form-actions">
-                <form id="add-product-form" method="post">
+                <form th:action="@{/account/cart/items/{id}(id=${product.id})}" method="post">
                     <button class="button button-primary" type="submit">Добавить в корзину</button>
                 </form>
                 <a class="button button-secondary" href="../catalog">Вернуться в каталог</a>
@@ -35,10 +44,5 @@
         </div>
     </section>
 </main>
-
-<script>
-    const productId = window.location.pathname.split('/').filter(Boolean).pop();
-    document.getElementById('add-product-form').action = `../cart/items/${productId}`;
-</script>
 </body>
 </html>
