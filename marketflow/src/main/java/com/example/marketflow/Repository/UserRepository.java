@@ -5,11 +5,11 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.example.marketflow.User.userenyt;
+import com.example.marketflow.User.UserEntity;
 
 @Repository
-public interface UserRepository extends JpaRepository<userenyt, Long> {
+public interface UserRepository extends JpaRepository<UserEntity, Long> {
     boolean existsByEmailIgnoreCase(String email);
 
-    Optional<userenyt> findByEmailIgnoreCaseAndPasswordHash(String email, String passwordHash);
+    Optional<UserEntity> findByEmailIgnoreCase(String email);
 }

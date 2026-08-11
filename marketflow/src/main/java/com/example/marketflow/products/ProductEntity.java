@@ -22,7 +22,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class productsEntity {
+public class ProductEntity {
     
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
@@ -57,7 +57,7 @@ public class productsEntity {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
-    public productsEntity (String name,BigDecimal price,Integer quantity,String url){
+    public ProductEntity (String name,BigDecimal price,Integer quantity,String url){
         this.name=name;
         this.price=price;
         this.quantity=quantity;

@@ -21,7 +21,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "users")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-public class userenyt {
+public class UserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -47,7 +47,7 @@ public class userenyt {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
-    public userenyt(String email, String passwordHash, String displayName) {
+    public UserEntity(String email, String passwordHash, String displayName) {
         this.email = email;
         this.passwordHash = passwordHash;
         this.displayName = displayName;

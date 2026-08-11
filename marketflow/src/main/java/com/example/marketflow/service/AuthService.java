@@ -2,77 +2,69 @@ package com.example.marketflow.service;
 
 import java.util.Optional;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.ModelAttribute;
 
 import com.example.marketflow.Repository.UserRepository;
+import com.example.marketflow.User.LoginRequest;
+import com.example.marketflow.User.RegisterRequest;
+import com.example.marketflow.User.ShowUserDto;
+import com.example.marketflow.User.UserEntity;
 import com.example.marketflow.User.UserMapper;
-import com.example.marketflow.User.Userdto;
-import com.example.marketflow.User.logindto;
-import com.example.marketflow.User.userenyt;
+import com.example.marketflow.exception.EmailAlreadyExistsException;
+import com.example.marketflow.exception.InvalidCredentialsException;
 
-import jakarta.servlet.http.HttpSession;
-import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 
 
 @Service
+@AllArgsConstructor
 public class AuthService {
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public AuthService(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
 
     @Transactional
-    public String funtction1 (Userdto userDto,BindingResult bindingResult){
-        if (bindingResult.hasErrors()) {
-            return "register-page";
-        }
+    public void register (RegisterRequest userDto){
 
         if (userRepository.existsByEmailIgnoreCase(userDto.getEmail())) {
-            return "register-duplicate";
+            throw new EmailAlreadyExistsException(userDto.getEmail());
         }
 
-        userRepository.save(UserMapper.convert(userDto));
-        return "register-success";
+        String passwordHash =passwordEncoder.encode(userDto.getPassword());
+
+        userRepository.save(UserMapper.convert(userDto, passwordHash));
     }
-    @Transactional
-    public String function2(@Valid @ModelAttribute logindto log,BindingResult bindingResult,Model model,HttpSession session
-    ) {
-        if (bindingResult.hasErrors()) {
-            return "login-page";
-        }
 
-        Optional<userenyt> user = userRepository.findByEmailIgnoreCaseAndPasswordHash(
-                log.getEmail(),
-                log.getPassword_hash()
-        );
+    @Transactional(readOnly = true)
+    public Optional<ShowUserDto> authenticate(LoginRequest log)
+    {
+        Optional<UserEntity> user =
+                userRepository.findByEmailIgnoreCase(log.getEmail().trim())
+                .orElseThrow(InvalidCredentialsException::new);
 
         if (user.isEmpty()) {
-            return "login/unsuccess";
+            return Optional.empty();
         }
-        session.setAttribute("userId", user.get().getId());
-        model.addAttribute("email", user.get().getEmail());
-        model.addAttribute("displayName", user.get().getDisplayName());
-        model.addAttribute("status", user.get().getStatus());
-        return "login/success";
+
+        boolean passwordCorrect = passwordEncoder.matches(
+                log.getPassword(),
+                user.get().getPasswordHash()
+        );
+
+        if (!passwordCorrect) {
+            return Optional.empty();
+        }
+
+        return Optional.of(UserMapper.toShowUserDto(user.get()));
     }
-    @Transactional
-    public String function3(HttpSession session,Model model){
-        Long d=(Long)session.getAttribute("userId");
-        if(d==null) return "redirect:/login";
-        userenyt es=userRepository.findById(d).orElse(null);
-        if (es == null) {
-            session.invalidate();
-            return "redirect:/login";
-        }
-        model.addAttribute("email",es.getEmail());
-        model.addAttribute("displayName",es.getDisplayName());
-        model.addAttribute("status",es.getStatus());
-        return "login/success";
+
+    @Transactional(readOnly = true)
+    public ShowUserDto getUserById(Long id){
+        return userRepository.findById(id)
+                .map(UserMapper::toShowUserDto)
+                .orElse(null);
     }
 
     

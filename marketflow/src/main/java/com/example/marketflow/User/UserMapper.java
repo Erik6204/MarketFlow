@@ -4,11 +4,20 @@ public final class UserMapper {
     private UserMapper() {
     }
 
-    public static userenyt convert(Userdto dto) {
-        return new userenyt(
+    public static UserEntity convert(RegisterRequest dto, String passwordHash) {
+        return new UserEntity(
                 dto.getEmail().trim().toLowerCase(),
-                dto.getPassword_hash(),
+                passwordHash,
                 dto.getDisplay_name().trim()
+        );
+    }
+
+    public static ShowUserDto toShowUserDto(UserEntity entity) {
+        return new ShowUserDto(
+                entity.getId(),
+                entity.getEmail(),
+                entity.getStatus(),
+                entity.getDisplayName()
         );
     }
 }

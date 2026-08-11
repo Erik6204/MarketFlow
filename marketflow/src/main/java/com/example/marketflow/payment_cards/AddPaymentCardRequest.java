@@ -10,7 +10,7 @@ import lombok.Setter;
 @Getter
 @Setter
 
-public class cartdto {
+public class AddPaymentCardRequest {
     
     Long userid;
 

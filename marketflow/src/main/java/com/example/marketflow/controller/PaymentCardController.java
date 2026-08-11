@@ -1,0 +1,38 @@
+package com.example.marketflow.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.example.marketflow.payment_cards.AddPaymentCardRequest;
+import com.example.marketflow.service.PaymentCardService;
+
+import jakarta.servlet.http.HttpSession;
+import lombok.AllArgsConstructor;
+
+@Controller
+@RequestMapping("/account")
+@AllArgsConstructor
+public class PaymentCardController {
+    private final PaymentCardService paymentCardService;
+
+    @GetMapping("/account/cards")
+    public String fifth(Model model,HttpSession session){
+        model.addAttribute("cards", paymentCardService.getUserPaymentCards((Long)session.getAttribute("userId")));
+        return "Page9";
+    }
+
+    @GetMapping("/cards/add")
+    public String six(){
+        return "Page10";
+    }
+
+    @PostMapping("/account/cards")
+    public String seven(@ModelAttribute AddPaymentCardRequest dto,HttpSession session){
+        paymentCardService.addPaymentCard((Long)session.getAttribute("userId"),dto);
+        return "Page11";
+    }
+}

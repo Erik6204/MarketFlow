@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Выбор обновлён | MarketFlow</title>
-    <link rel="stylesheet" href="/css/market.css">
+    <link rel="stylesheet" th:href="@{/css/market.css}" href="/css/market.css">
 </head>
 <body>
 <header class="market-header">
-    <a class="market-brand" href="../../../catalog">MarketFlow</a>
+    <a class="market-brand" th:href="@{/account/catalog}" href="/account/catalog">MarketFlow</a>
 </header>
 <main class="result-wrap">
     <section class="result-panel">
@@ -17,8 +17,8 @@
         <h1>Выбор сохранён</h1>
         <p class="muted">Состояние позиции учтено при подготовке заказа.</p>
         <div class="result-actions">
-            <a class="button button-primary" href="../../../cart">Вернуться в корзину</a>
-            <a class="button button-secondary" href="../../../checkout">К оформлению</a>
+            <a class="button button-primary" th:href="@{/account/cart}" href="/account/cart">Вернуться в корзину</a>
+            <a class="button button-secondary" th:href="@{/account/checkout}" href="/account/checkout">К оформлению</a>
         </div>
     </section>
 </main>

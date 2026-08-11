@@ -20,8 +20,8 @@
                 <p class="supporting-text">Заполните данные будущего профиля.</p>
 
                 <form class="auth-form"
-                      th:action="@{/register/succ}"
-                      action="/register/succ"
+                      th:action="@{/register}"
+                      action="/register"
                       method="post">
                     <div class="field">
                         <label for="display_name">Имя</label>
@@ -46,9 +46,9 @@
                     </div>
 
                     <div class="field">
-                        <label for="password_hash">Пароль</label>
-                        <input id="password_hash"
-                               name="password_hash"
+                        <label for="password">Пароль</label>
+                        <input id="password"
+                               name="password"
                                type="password"
                                minlength="8"
                                maxlength="100"

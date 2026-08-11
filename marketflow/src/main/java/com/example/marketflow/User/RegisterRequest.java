@@ -10,8 +10,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Userdto {
+public class RegisterRequest {
 
+    
     @NotBlank(message = "email не должен быть пустым")
     @Email(message = "некорректный формат email")
     @Size(max = 320, message = "email не должен быть длиннее 320 символов")
@@ -19,7 +20,7 @@ public class Userdto {
 
     @NotBlank(message = "пароль не должен быть пустым")
     @Size(min = 8, max = 100, message = "пароль должен содержать от 8 до 100 символов")
-    private String password_hash;
+    private String password;
 
     @NotBlank(message = "имя не должно быть пустым")
     @Size(max = 100, message = "имя не должно быть длиннее 100 символов")

@@ -23,7 +23,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @RequiredArgsConstructor
-public class cartitemsentity {
+public class CartItemEntity {
     @NonNull
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
@@ -45,7 +45,7 @@ public class cartitemsentity {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
-    public cartitemsentity(Long buyerid, Long productid) {
+    public CartItemEntity(Long buyerid, Long productid) {
         this.buyerid = buyerid;
         this.productid = productid;
         this.quantity = 1;

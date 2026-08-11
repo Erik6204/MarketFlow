@@ -8,12 +8,12 @@
 </head>
 <body>
 <header class="market-header">
-    <a class="market-brand" href="./catalog">MarketFlow</a>
+    <a class="market-brand" th:href="@{/account/catalog}" href="/account/catalog">MarketFlow</a>
     <nav class="market-nav" aria-label="Основная навигация">
-        <a href="./catalog">Каталог</a>
-        <a href="./cart" aria-current="page">Корзина</a>
-        <a href="./account/cards">Карты</a>
-        <a href="/account">Профиль</a>
+        <a th:href="@{/account/catalog}" href="/account/catalog">Каталог</a>
+        <a th:href="@{/account/cart}" href="/account/cart" aria-current="page">Корзина</a>
+        <a th:href="@{/account/account/cards}" href="/account/account/cards">Карты</a>
+        <a th:href="@{/account}" href="/account">Профиль</a>
     </nav>
 </header>
 
@@ -24,7 +24,7 @@
             <h1>Корзина</h1>
             <p class="muted">Проверьте выбранные позиции перед оформлением.</p>
         </div>
-        <a class="button button-secondary" href="./catalog">Добавить товары</a>
+        <a class="button button-secondary" th:href="@{/account/catalog}" href="/account/catalog">Добавить товары</a>
     </div>
 
     <section class="data-panel" th:if="${cartItems != null and !cartItems.isEmpty()}">
@@ -66,7 +66,7 @@
             <div class="data-label">Следующий шаг</div>
             <div class="data-value">Расчёт итоговой суммы</div>
         </div>
-        <a class="button button-primary" href="./checkout">Перейти к оформлению</a>
+        <a class="button button-primary" th:href="@{/account/checkout}" href="/account/checkout">Перейти к оформлению</a>
     </div>
 </main>
 </body>

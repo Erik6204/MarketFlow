@@ -7,19 +7,20 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
-import com.example.marketflow.User.Userdto;
-import com.example.marketflow.User.logindto;
+import com.example.marketflow.User.LoginRequest;
+import com.example.marketflow.User.RegisterRequest;
+import com.example.marketflow.User.ShowUserDto;
 import com.example.marketflow.service.AuthService;
 
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 
 @Controller
-public class Authcontroller {
+public class AuthController {
 
     private final AuthService authservice;
 
-    public Authcontroller(AuthService authservice) {
+    public AuthController(AuthService authservice) {
         this.authservice = authservice;
     }
 
@@ -38,21 +39,50 @@ public class Authcontroller {
         return "login-page";
     }
 
-    @PostMapping("/register/succ")
-    public String saver(@Valid @ModelAttribute Userdto userDto,BindingResult bindingResult) 
-    {
-        return authservice.funtction1(userDto,bindingResult);
+    @PostMapping("/register")
+    public String register(
+            @Valid @ModelAttribute RegisterRequest request,
+            BindingResult bindingResult
+    ) {
+        if (bindingResult.hasErrors()) {
+            return "register-page";
+        }
+
+        authservice.register(request);
+
+        return "redirect:/login";
     }
 
     @PostMapping("/login/success")
-    public String loginsuc(@Valid @ModelAttribute logindto log,BindingResult bindingResult,Model model,HttpSession session)
+    public String login(@Valid @ModelAttribute LoginRequest log,BindingResult bindingResult,Model model,HttpSession session)
     {
-        return authservice.function2(log, bindingResult, model, session);
+        if (bindingResult.hasErrors()) {
+            return "login-page";
+        }
+        java.util.Optional<ShowUserDto> user=authservice.authenticate(log);
+        if (user.isEmpty()) {
+            return "login/unsuccess";
+        }
+        session.setAttribute("userId", user.get().getId());
+        model.addAttribute("email", user.get().getEmail());
+        model.addAttribute("displayName", user.get().getDisplayName());
+        model.addAttribute("status", user.get().getStatus());
+        return "login/success";
     }
 
     @GetMapping("/account")
-    public String acc(HttpSession session,Model model){
-        return authservice.function3(session, model);
+    public String showAccount(HttpSession session,Model model){
+        Long d=(Long)session.getAttribute("userId");
+        if(d==null) return "redirect:/login";
+        ShowUserDto ess=authservice.getUserById(d);
+        if (ess == null) {
+            session.invalidate();
+            return "redirect:/login";
+        }
+        model.addAttribute("email",ess.getEmail());
+        model.addAttribute("displayName",ess.getDisplayName());
+        model.addAttribute("status",ess.getStatus());
+        return "login/success";
     }
 
     

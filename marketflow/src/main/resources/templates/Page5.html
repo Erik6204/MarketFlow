@@ -8,7 +8,7 @@
 </head>
 <body>
 <header class="market-header">
-    <a class="market-brand" href="../../../catalog">MarketFlow</a>
+    <a class="market-brand" th:href="@{/account/catalog}" href="/account/catalog">MarketFlow</a>
 </header>
 <main class="result-wrap">
     <section class="result-panel">
@@ -20,8 +20,8 @@
             <strong th:text="${count}">1</strong>
         </p>
         <div class="result-actions">
-            <a class="button button-primary" href="../../../cart">Вернуться в корзину</a>
-            <a class="button button-secondary" href="../../../catalog">Каталог</a>
+            <a class="button button-primary" th:href="@{/account/cart}" href="/account/cart">Вернуться в корзину</a>
+            <a class="button button-secondary" th:href="@{/account/catalog}" href="/account/catalog">Каталог</a>
         </div>
     </section>
 </main>
