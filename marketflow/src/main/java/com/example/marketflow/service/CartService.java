@@ -13,6 +13,11 @@ import com.example.marketflow.Repository.ProductRepository;
 import com.example.marketflow.cart.CartItemEntity;
 import com.example.marketflow.cart.CartitemDto;
 import com.example.marketflow.cart.CartitemMapper;
+import com.example.marketflow.exception.CartItemNotFoundException;
+import com.example.marketflow.exception.InsufficientStockException;
+import com.example.marketflow.exception.InvalidQuantityException;
+import com.example.marketflow.exception.ProductNotFoundException;
+import com.example.marketflow.exception.ProductUnavailableException;
 import com.example.marketflow.products.ProductEntity;
 
 import lombok.AllArgsConstructor;
@@ -22,22 +27,22 @@ import lombok.AllArgsConstructor;
 public class CartService {
     private final CartItemRepository repost;
     private final ProductRepository rep;
-    private final CartitemMapper mapper;
+    
 
     private CartItemEntity findOwnedCartItem(Long itemId, Long buyerId) {
         return repost.findByIdAndBuyerid(itemId, buyerId).orElseThrow(
-                () -> new IllegalArgumentException("Cart item was not found")
+                () -> new CartItemNotFoundException()
         );
     }
 
     @Transactional
-    public void addProductToCart(Long buyerId, Long productId) {
+    public void addProductToCart(Long buyerId, Long productId ) {
         ProductEntity product = rep.findById(productId).orElseThrow(
-                () -> new IllegalArgumentException("Product was not found")
+                () -> new ProductNotFoundException(productId)
         );
-
+        
         if (!Boolean.TRUE.equals(product.getActive())) {
-            throw new IllegalArgumentException("Product is not available");
+            throw new ProductUnavailableException();
         }
 
         Optional<CartItemEntity> existingItem =
@@ -48,7 +53,7 @@ public class CartService {
                 .orElse(1);
 
         if (newQuantity > product.getQuantity()) {
-            throw new IllegalArgumentException("Not enough product in stock");
+            throw new InsufficientStockException();
         }
 
         if (existingItem.isPresent()) {
@@ -60,7 +65,23 @@ public class CartService {
 
     @Transactional(readOnly = true)
     public List<CartitemDto> getUserCartItems(Long buyerId) {
-        return repost.findAllByBuyerid(buyerId).stream().map(CartitemMapper::convertByEntity).toList();
+        return repost.findAllByBuyerid(buyerId)
+            .stream()
+            .map(item -> {
+                ProductEntity product = rep
+                        .findById(item.getProductid())
+                        .orElseThrow(() ->
+                                new ProductNotFoundException(
+                                        item.getProductid()
+                                )
+                        );
+
+                return CartitemMapper.convertByEntity(
+                        item,
+                        product
+                );
+            })
+            .toList();
     }
 
     @Transactional
@@ -69,21 +90,41 @@ public class CartService {
             Long buyerId,
             Integer quantity
     ) {
-        CartItemEntity item = findOwnedCartItem(id, buyerId);
-        ProductEntity product = rep.findById(item.getProductid()).orElseThrow();
+        if (quantity == null || quantity < 1) {
+            throw new InvalidQuantityException(quantity);
+        }
 
-        int newQuantity = Math.max(1, Math.min(quantity, product.getQuantity()));
-        item.setQuantity(newQuantity);
-        return newQuantity;
+        CartItemEntity item = findOwnedCartItem(id, buyerId);
+
+        ProductEntity product = rep.findById(item.getProductid())
+                .orElseThrow(
+                        () -> new ProductNotFoundException(item.getProductid())
+                );
+
+        if (!Boolean.TRUE.equals(product.getActive())) {
+            throw new ProductUnavailableException();
+        }
+
+        if (product.getQuantity() == null || product.getQuantity() <= 0) {
+            throw new ProductUnavailableException();
+        }
+
+        if (quantity > product.getQuantity()) {
+            throw new InsufficientStockException();
+        }
+
+        item.setQuantity(quantity);
+
+        return quantity;
     }
 
     @Transactional
     public void changeCartItemSelection(
-            Long id,
+            Long itemId,
             Long buyerId,
-            Boolean active
+            boolean active
     ) {
-        CartItemEntity item = repost.findByIdAndBuyerid(id, buyerId).orElseThrow();
+        CartItemEntity item = findOwnedCartItem(itemId, buyerId);
         item.setSelected(active);
     }
 

@@ -1,9 +1,9 @@
 package com.example.marketflow.exception;
 
-public class InvalidCredentialsException extends Exception {
+public class InvalidCredentialsException extends RuntimeException {
 
-    public InvalidCredentialsException (String message){
-        super("Неверные учетные данные:"+message);
+    public InvalidCredentialsException (){
+        super("Неверный email или пароль");
     }
     
 }

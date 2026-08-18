@@ -20,19 +20,19 @@ public class PaymentCardController {
     private final PaymentCardService paymentCardService;
 
     @GetMapping("/account/cards")
-    public String fifth(Model model,HttpSession session){
+    public String ShowCardUser(Model model,HttpSession session){
         model.addAttribute("cards", paymentCardService.getUserPaymentCards((Long)session.getAttribute("userId")));
-        return "Page9";
+        return "showCards";
     }
 
     @GetMapping("/cards/add")
-    public String six(){
-        return "Page10";
+    public String InterfaceAddCardUser(){
+        return "addCardForm";
     }
 
     @PostMapping("/account/cards")
-    public String seven(@ModelAttribute AddPaymentCardRequest dto,HttpSession session){
+    public String AddCardUser(@ModelAttribute AddPaymentCardRequest dto,HttpSession session){
         paymentCardService.addPaymentCard((Long)session.getAttribute("userId"),dto);
-        return "Page11";
+        return "cardAdded";
     }
 }

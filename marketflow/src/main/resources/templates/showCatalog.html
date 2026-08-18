@@ -13,7 +13,7 @@
         <a th:href="@{/account/catalog}" href="/account/catalog" aria-current="page">Каталог</a>
         <a th:href="@{/account/cart}" href="/account/cart">Корзина</a>
         <a th:href="@{/account/account/cards}" href="/account/account/cards">Карты</a>
-        <a th:href="@{/account}" href="/account">Профиль</a>
+        <a th:href="@{/Buyer/account}" href="/Buyer/account">Профиль</a>
     </nav>
 </header>
 
@@ -29,14 +29,13 @@
 
     <section class="product-grid" th:if="${products != null and !products.isEmpty()}">
         <article class="product-card"
-                 th:each="product : ${products}"
-                 th:if="${product.active}">
+                 th:each="product : ${products}">
             <div class="product-media">
-                <img th:if="${product.url != null and !#strings.isEmpty(product.url)}"
-                     th:src="${product.url}"
+                <img th:if="${product.imageUrl != null and !#strings.isEmpty(product.imageUrl)}"
+                     th:src="${product.imageUrl}"
                      th:alt="${product.name}">
                 <div class="product-placeholder"
-                     th:unless="${product.url != null and !#strings.isEmpty(product.url)}">
+                     th:unless="${product.imageUrl != null and !#strings.isEmpty(product.imageUrl)}">
                     Нет изображения
                 </div>
             </div>

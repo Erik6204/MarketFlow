@@ -57,9 +57,26 @@
                                required>
                     </div>
 
-                    <button class="button button-primary" type="submit">
-                        Создать аккаунт
-                    </button>
+                    <fieldset class="account-type-fieldset">
+                        <legend>Кем вы хотите зарегистрироваться?</legend>
+                        <p class="account-type-hint">
+                            Продавец также сможет пользоваться каталогом и совершать покупки.
+                        </p>
+                        <div class="registration-actions">
+                            <button class="button button-primary"
+                                    type="submit"
+                                    name="accountType"
+                                    value="BUYER">
+                                Как покупатель
+                            </button>
+                            <button class="button button-secondary"
+                                    type="submit"
+                                    name="accountType"
+                                    value="SELLER">
+                                Как продавец
+                            </button>
+                        </div>
+                    </fieldset>
                 </form>
 
                 <p class="footer-link">

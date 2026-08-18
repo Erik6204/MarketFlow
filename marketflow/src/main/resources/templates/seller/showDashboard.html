@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Кабинет продавца | MarketFlow</title>
+    <link rel="stylesheet" th:href="@{/css/market.css}" href="/css/market.css">
+</head>
+<body>
+<header class="market-header">
+    <a class="market-brand" th:href="@{/seller/account}" href="/seller/account">MarketFlow Seller</a>
+    <nav class="market-nav" aria-label="Навигация продавца">
+        <a th:href="@{/seller/account}" href="/seller/account" aria-current="page">Мои товары</a>
+        <a th:href="@{/seller/products/new}" href="/seller/products/new">Добавить товар</a>
+        <a th:href="@{/account/catalog}" href="/account/catalog">Режим покупателя</a>
+    </nav>
+</header>
+
+<main class="market-main">
+    <div class="page-heading">
+        <div>
+            <p class="eyebrow">Кабинет продавца</p>
+            <h1>Мои товары</h1>
+            <p class="muted">Управляйте ассортиментом, ценами и остатками.</p>
+        </div>
+        <a class="button button-primary" th:href="@{/seller/products/new}" href="/seller/products/new">
+            Добавить товар
+        </a>
+    </div>
+
+    <section class="product-grid" th:if="${Info != null and !Info.isEmpty()}">
+        <article class="product-card" th:each="product : ${Info}">
+            <div class="product-media">
+                <img th:if="${product.imageUrl != null and !#strings.isEmpty(product.imageUrl)}"
+                     th:src="${product.imageUrl}"
+                     th:alt="${product.name}">
+                <div class="product-placeholder"
+                     th:unless="${product.imageUrl != null and !#strings.isEmpty(product.imageUrl)}">
+                    Нет изображения
+                </div>
+            </div>
+
+            <div class="product-content">
+                <h2 th:text="${product.name}">Название товара</h2>
+                <p class="product-description" th:text="${product.description}">Описание товара</p>
+                <div class="price-row">
+                    <span class="price" th:text="${product.price + ' ₽'}">0.00 ₽</span>
+                    <span class="stock" th:text="${'Остаток: ' + product.quantity}">Остаток: 0</span>
+                </div>
+                <div class="seller-meta">
+                    <span th:text="${'Себестоимость: ' + product.costPrice + ' ₽'}">Себестоимость: 0.00 ₽</span>
+                    <span class="status-badge"
+                          th:classappend="${product.active} ? ' status-active' : ' status-disabled'"
+                          th:text="${product.active} ? 'Активен' : 'Отключён'">Активен</span>
+                </div>
+                <div class="card-actions">
+                    <a class="button button-secondary"
+                       th:href="@{/seller/products/{id}(id=${product.id})}"
+                       href="/seller/products/1">
+                        Открыть
+                    </a>
+                </div>
+            </div>
+        </article>
+    </section>
+
+    <section class="empty-state" th:if="${Info == null or Info.isEmpty()}">
+        <h2>У вас пока нет товаров</h2>
+        <p class="muted">Добавьте первый товар, чтобы он появился в кабинете продавца.</p>
+        <div class="empty-actions">
+            <a class="button button-primary" th:href="@{/seller/products/new}" href="/seller/products/new">
+                Добавить товар
+            </a>
+        </div>
+    </section>
+</main>
+</body>
+</html>

@@ -23,7 +23,7 @@ public class CartController {
     private final CartService cartService;
 
     @PostMapping("/cart/items/{productId}")
-    public String pos(Model model,@PathVariable("productId") Long productId,HttpSession session) {
+    public String addProductToCart(Model model,@PathVariable("productId") Long productId,HttpSession session) {
         Long userId =
             (Long) session.getAttribute("userId");
 
@@ -34,10 +34,11 @@ public class CartController {
         cartService.addProductToCart(userId, productId);
 
         return "redirect:/account/cart";
+        
     }
 
     @GetMapping("/cart")
-    public String car(Model model,HttpSession session){
+    public String ShowCartUser(Model model,HttpSession session){
         Long userId = (Long) session.getAttribute("userId");
 
         if (userId == null) {
@@ -48,11 +49,11 @@ public class CartController {
 
         model.addAttribute("cartItems", cartItems);
 
-        return "Page4";
+        return "showCart";
     }
 
     @PostMapping("/cart/items/{itemId}/quantity")
-    public String first(Model model,@PathVariable("itemId")Long itemId,
+    public String UpdateCartItemQuantity(@PathVariable("itemId")Long itemId,
     @RequestParam("quantity") Integer quantity,HttpSession session){
         
         Long userId =(Long) session.getAttribute("userId");
@@ -61,13 +62,12 @@ public class CartController {
             return "redirect:/login";
         }
 
-        model.addAttribute("count", cartService.updateCartItemQuantity(itemId, userId, quantity));
-
-        return "Page5";
+        cartService.updateCartItemQuantity(itemId, userId, quantity);
+        return "redirect:/account/cart";
     }
 
     @PostMapping("/cart/items/{itemId}/select")
-    public String second(@PathVariable("itemId") Long itemId,@RequestParam("choise") Boolean choice,
+    public String ChangeCartItemSelection(@PathVariable("itemId") Long itemId,@RequestParam("selected") boolean selected,
     HttpSession session) 
     {
         Long userId =(Long) session.getAttribute("userId");
@@ -75,13 +75,20 @@ public class CartController {
         if (userId == null) {
             return "redirect:/login";
         }
-        cartService.changeCartItemSelection(itemId, userId, choice);
-        return "Page6";
+        cartService.changeCartItemSelection(itemId, userId, selected);
+
+        return "redirect:/account/cart";
     }
 
     @PostMapping("/cart/items/{itemId}/delete")
-    public String third(@PathVariable("itemId") Long itemId,HttpSession session){
-        cartService.removeCartItem(itemId,(Long) session.getAttribute("userId"));
-        return "Page7";
+    public String RemoveCartItem(@PathVariable("itemId") Long itemId,HttpSession session){
+        Long userId = (Long) session.getAttribute("userId");
+
+        if (userId == null) {
+            return "redirect:/login";
+        }
+
+        cartService.removeCartItem(itemId, userId);
+        return "redirect:/account/cart";
     }
 }

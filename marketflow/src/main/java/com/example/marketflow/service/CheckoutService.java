@@ -11,6 +11,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.marketflow.Repository.CartItemRepository;
 import com.example.marketflow.Repository.ProductRepository;
 import com.example.marketflow.cart.CartItemEntity;
+import com.example.marketflow.exception.InsufficientStockException;
+import com.example.marketflow.exception.NoSelectedCartItemsException;
+import com.example.marketflow.exception.ProductNotFoundException;
+import com.example.marketflow.exception.ProductUnavailableException;
 import com.example.marketflow.products.ProductEntity;
 
 import lombok.AllArgsConstructor;
@@ -27,7 +31,7 @@ public class CheckoutService {
                 repost.findAllByBuyeridAndSelectedTrue(buyerId);
 
         if (cartItems.isEmpty()) {
-            return BigDecimal.ZERO;
+            throw new NoSelectedCartItemsException();
         }
 
         List<Long> productIds = cartItems.stream()
@@ -47,21 +51,15 @@ public class CheckoutService {
             ProductEntity product = productsById.get(item.getProductid());
 
             if (product == null) {
-                throw new IllegalArgumentException(
-                        "Product was not found: " + item.getProductid()
-                );
+                throw new ProductNotFoundException(item.getProductid());
             }
 
             if (!Boolean.TRUE.equals(product.getActive())) {
-                throw new IllegalArgumentException(
-                        "Product is not available: " + product.getId()
-                );
+                throw new ProductUnavailableException();
             }
 
             if (product.getQuantity() < item.getQuantity()) {
-                throw new IllegalArgumentException(
-                        "Not enough product in stock: " + product.getId()
-                );
+                throw new InsufficientStockException();
             }
 
             BigDecimal itemTotal = product.getPrice().multiply(

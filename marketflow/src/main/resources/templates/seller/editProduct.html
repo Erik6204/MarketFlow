@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Редактировать товар | MarketFlow</title>
+    <link rel="stylesheet" th:href="@{/css/market.css}" href="/css/market.css">
+</head>
+<body>
+<header class="market-header">
+    <a class="market-brand" th:href="@{/seller/account}" href="/seller/account">MarketFlow Seller</a>
+    <nav class="market-nav" aria-label="Навигация продавца">
+        <a th:href="@{/seller/account}" href="/seller/account">Мои товары</a>
+        <a th:href="@{/seller/products/new}" href="/seller/products/new">Добавить товар</a>
+        <a th:href="@{/account/catalog}" href="/account/catalog">Режим покупателя</a>
+    </nav>
+</header>
+
+<main class="form-wrap">
+    <section class="form-shell">
+        <p class="eyebrow">Управление товаром</p>
+        <h1>Редактировать товар</h1>
+        <p class="muted">
+            Измените только нужные данные. Поля уже заполнены текущими значениями товара.
+        </p>
+
+        <form class="market-form"
+              th:action="@{/seller/products/{id}/edit(id=${productId})}"
+              th:object="${product}"
+              method="post">
+
+            <div class="field">
+                <label for="name">Название</label>
+                <input id="name"
+                       type="text"
+                       th:field="*{name}"
+                       maxlength="200"
+                       autocomplete="off">
+                <p class="field-error"
+                   th:if="${#fields.hasErrors('name')}"
+                   th:errors="*{name}">Ошибка названия</p>
+            </div>
+
+            <div class="field">
+                <label for="description">Описание</label>
+                <textarea id="description"
+                          th:field="*{description}"
+                          rows="5"></textarea>
+                <p class="field-error"
+                   th:if="${#fields.hasErrors('description')}"
+                   th:errors="*{description}">Ошибка описания</p>
+            </div>
+
+            <div class="field">
+                <label for="price">Цена для покупателя</label>
+                <input id="price"
+                       type="number"
+                       th:field="*{price}"
+                       min="0.01"
+                       step="0.01"
+                       inputmode="decimal">
+                <p class="field-error"
+                   th:if="${#fields.hasErrors('price')}"
+                   th:errors="*{price}">Ошибка цены</p>
+            </div>
+
+            <div class="field">
+                <label for="imageUrl">Ссылка на изображение</label>
+                <input id="imageUrl"
+                       type="url"
+                       th:field="*{imageUrl}"
+                       maxlength="1000"
+                       inputmode="url"
+                       autocomplete="url">
+                <p class="field-error"
+                   th:if="${#fields.hasErrors('imageUrl')}"
+                   th:errors="*{imageUrl}">Ошибка ссылки</p>
+            </div>
+
+            <div class="form-actions">
+                <button class="button button-primary" type="submit">Сохранить изменения</button>
+                <a class="button button-secondary"
+                   th:href="@{/seller/products/{id}(id=${productId})}"
+                   href="/seller/products/1">
+                    Отмена
+                </a>
+            </div>
+        </form>
+    </section>
+</main>
+</body>
+</html>

@@ -192,6 +192,33 @@ a {
     gap: 20px;
 }
 
+.account-type-fieldset {
+    min-width: 0;
+    margin: 4px 0 0;
+    padding: 0;
+    border: 0;
+}
+
+.account-type-fieldset legend {
+    margin-bottom: 8px;
+    color: #26332d;
+    font-size: 15px;
+    font-weight: 750;
+}
+
+.account-type-hint {
+    margin: 0 0 14px;
+    color: #66716b;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.registration-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
 .field {
     display: grid;
     gap: 8px;
@@ -356,6 +383,10 @@ a {
     .centered-section {
         align-items: start;
         padding-top: 40px;
+    }
+
+    .registration-actions {
+        grid-template-columns: 1fr;
     }
 
     .profile-list > div {

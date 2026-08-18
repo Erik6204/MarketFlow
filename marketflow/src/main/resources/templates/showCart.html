@@ -13,7 +13,7 @@
         <a th:href="@{/account/catalog}" href="/account/catalog">Каталог</a>
         <a th:href="@{/account/cart}" href="/account/cart" aria-current="page">Корзина</a>
         <a th:href="@{/account/account/cards}" href="/account/account/cards">Карты</a>
-        <a th:href="@{/account}" href="/account">Профиль</a>
+        <a th:href="@{/Buyer/account}" href="/Buyer/account">Профиль</a>
     </nav>
 </header>
 
@@ -29,13 +29,27 @@
 
     <section class="data-panel" th:if="${cartItems != null and !cartItems.isEmpty()}">
         <div class="data-row" th:each="item : ${cartItems}">
-            <div>
-                <div class="data-label">Товар</div>
-                <div class="data-value" th:text="${'ID ' + item.productid}">ID товара</div>
+            <div class="cart-product">
+                <div class="cart-product-media">
+                    <img th:if="${item.imageUrl != null and !#strings.isEmpty(item.imageUrl)}"
+                         th:src="${item.imageUrl}"
+                         th:alt="${item.productName}">
+                    <span th:unless="${item.imageUrl != null and !#strings.isEmpty(item.imageUrl)}">Нет фото</span>
+                </div>
+                <div>
+                    <div class="data-label">Товар</div>
+                    <a class="data-value cart-product-link"
+                       th:href="@{/account/products/{id}(id=${item.productId})}"
+                       th:text="${item.productName}">
+                        Название товара
+                    </a>
+                    <div class="cart-product-price" th:text="${item.price + ' ₽ за штуку'}">0.00 ₽ за штуку</div>
+                </div>
             </div>
             <div>
                 <div class="data-label">Количество</div>
                 <div class="data-value" th:text="${item.quantity}">1</div>
+                <div class="cart-product-price" th:text="${'Сумма: ' + item.subtotal + ' ₽'}">Сумма: 0.00 ₽</div>
             </div>
             <div class="card-actions">
                 <form th:action="@{/account/cart/items/{id}/quantity(id=${item.id})}" method="post">
@@ -43,7 +57,7 @@
                     <button class="button button-secondary" type="submit">Изменить количество</button>
                 </form>
                 <form th:action="@{/account/cart/items/{id}/select(id=${item.id})}" method="post">
-                    <input type="hidden" name="choise" th:value="${!item.selected}">
+                    <input type="hidden" name="selected" th:value="${!item.selected}">
                     <button class="button button-secondary" type="submit"
                             th:text="${item.selected ? 'Снять выбор' : 'Выбрать'}">
                         Выбрать

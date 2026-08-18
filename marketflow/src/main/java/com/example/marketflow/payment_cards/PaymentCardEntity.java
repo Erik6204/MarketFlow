@@ -42,7 +42,7 @@ public class PaymentCardEntity {
     @Column(precision=12,scale=2)
     private BigDecimal balance;
 
-    @NonNull
+    
     @Column(nullable = false)
     private boolean active = true;
     

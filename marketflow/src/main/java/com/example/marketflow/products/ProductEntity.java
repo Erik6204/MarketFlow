@@ -29,7 +29,7 @@ public class ProductEntity {
     private Long id;
 
     @Column(name="seller_id")
-    private Long md;
+    private Long sellerId;
 
     @Column
     private String name;
@@ -57,11 +57,14 @@ public class ProductEntity {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
-    public ProductEntity (String name,BigDecimal price,Integer quantity,String url){
+    public ProductEntity (Long sellerId,String name,String description,BigDecimal price,Integer quantity,String url){
+        this.sellerId=sellerId;
         this.name=name;
+        this.description=description;
         this.price=price;
         this.quantity=quantity;
         this.url=url;
+        this.active=true;
     }
 
 

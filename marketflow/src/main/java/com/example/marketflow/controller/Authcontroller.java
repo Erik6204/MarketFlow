@@ -1,7 +1,6 @@
 package com.example.marketflow.controller;
 
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -26,17 +25,17 @@ public class AuthController {
 
     @GetMapping("/")
     public String authPage() {
-        return "auth-page";
+        return "authPage";
     }
 
     @GetMapping("/register")
     public String registerPage() {
-        return "register-page";
+        return "registerPage";
     }
 
     @GetMapping("/login")
     public String loginPage() {
-        return "login-page";
+        return "loginPage";
     }
 
     @PostMapping("/register")
@@ -45,7 +44,7 @@ public class AuthController {
             BindingResult bindingResult
     ) {
         if (bindingResult.hasErrors()) {
-            return "register-page";
+            return "registerPage";
         }
 
         authservice.register(request);
@@ -53,37 +52,24 @@ public class AuthController {
         return "redirect:/login";
     }
 
-    @PostMapping("/login/success")
-    public String login(@Valid @ModelAttribute LoginRequest log,BindingResult bindingResult,Model model,HttpSession session)
+    @PostMapping("/login")
+    public String login(@Valid @ModelAttribute LoginRequest log,BindingResult bindingResult,HttpSession session)
     {
         if (bindingResult.hasErrors()) {
-            return "login-page";
+            return "loginPage";
         }
-        java.util.Optional<ShowUserDto> user=authservice.authenticate(log);
-        if (user.isEmpty()) {
-            return "login/unsuccess";
-        }
-        session.setAttribute("userId", user.get().getId());
-        model.addAttribute("email", user.get().getEmail());
-        model.addAttribute("displayName", user.get().getDisplayName());
-        model.addAttribute("status", user.get().getStatus());
-        return "login/success";
+        ShowUserDto user=authservice.authenticate(log);
+ 
+        session.setAttribute("userId", user.getId());
+        return authservice.isSeller(user.getId())?"redirect:/seller/account" : "redirect:/Buyer/account";
     }
 
-    @GetMapping("/account")
-    public String showAccount(HttpSession session,Model model){
-        Long d=(Long)session.getAttribute("userId");
-        if(d==null) return "redirect:/login";
-        ShowUserDto ess=authservice.getUserById(d);
-        if (ess == null) {
-            session.invalidate();
-            return "redirect:/login";
-        }
-        model.addAttribute("email",ess.getEmail());
-        model.addAttribute("displayName",ess.getDisplayName());
-        model.addAttribute("status",ess.getStatus());
-        return "login/success";
+    @PostMapping("/logout")
+    public String logout(HttpSession session) {
+        session.invalidate();
+        return "redirect:/";
     }
+    
 
     
 }

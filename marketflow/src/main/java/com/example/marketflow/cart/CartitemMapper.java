@@ -1,10 +1,31 @@
 package com.example.marketflow.cart;
 
-public class CartitemMapper {
-    private CartitemMapper(){}
+import java.math.BigDecimal;
 
-    public static CartitemDto convertByEntity(CartItemEntity entit){
-        return new CartitemDto(entit.getBuyerid(),entit.getProductid());
+import com.example.marketflow.products.ProductEntity;
+
+public final class CartitemMapper {
+
+    private CartitemMapper() {
     }
 
+    public static CartitemDto convertByEntity(
+            CartItemEntity entity,
+            ProductEntity product
+    ) {
+        BigDecimal subtotal = product.getPrice().multiply(
+                BigDecimal.valueOf(entity.getQuantity())
+        );
+
+        return new CartitemDto(
+                entity.getId(),
+                product.getId(),
+                product.getName(),
+                product.getPrice(),
+                entity.getQuantity(),
+                entity.getSelected(),
+                product.getUrl(),
+                subtotal
+        );
+    }
 }

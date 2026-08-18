@@ -45,9 +45,11 @@
                 <a class="button button-secondary" th:href="@{/account/account/cards}" href="/account/account/cards">
                     Управление картами
                 </a>
-                <a class="button button-secondary profile-exit" th:href="@{/}" href="/">
+                <form th:action="@{/logout}" action="/logout" method="post">
+                    <button class="button button-secondary profile-exit" type="submit">
                     Выйти на главную
-                </a>
+                    </button>
+                </form>
             </div>
         </section>
     </main>

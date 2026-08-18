@@ -18,7 +18,8 @@ body {
 }
 
 button,
-input {
+input,
+textarea {
     font: inherit;
 }
 
@@ -192,6 +193,37 @@ a {
     font-weight: 650;
 }
 
+.seller-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    color: #68736d;
+    font-size: 12px;
+    font-weight: 650;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 26px;
+    padding: 4px 9px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.status-active {
+    color: #0f5736;
+    background: #e8f3ec;
+}
+
+.status-disabled {
+    color: #9f271f;
+    background: #fff0ee;
+}
+
 .card-actions,
 .form-actions,
 .result-actions {
@@ -249,6 +281,89 @@ a {
     background: #fff0ee;
 }
 
+.button:disabled,
+.button:disabled:hover {
+    border-color: #d9dfdb;
+    color: #8a948f;
+    background: #eef1ef;
+    cursor: not-allowed;
+    opacity: 0.82;
+}
+
+.inline-action {
+    display: inline-flex;
+    margin: 0;
+}
+
+.action-hint {
+    margin: 10px 0 0;
+    color: #9a5a12;
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.restock-panel {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: 22px;
+    margin-top: 20px;
+    padding: 18px 20px;
+    border: 1px solid #d9dfdb;
+    border-radius: 7px;
+    background: #ffffff;
+}
+
+.restock-copy h2 {
+    margin: 0 0 5px;
+    font-size: 18px;
+}
+
+.restock-copy p {
+    margin: 0;
+    color: #68736d;
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.restock-form {
+    display: grid;
+    grid-template-columns: 130px auto;
+    align-items: end;
+    gap: 8px;
+}
+
+.restock-control {
+    display: grid;
+    gap: 5px;
+}
+
+.restock-control label {
+    color: #2b3831;
+    font-size: 12px;
+    font-weight: 750;
+}
+
+.restock-control input {
+    width: 100%;
+    min-height: 42px;
+    padding: 8px 10px;
+    border: 1px solid #b9c5be;
+    border-radius: 5px;
+    outline: none;
+    color: #18211d;
+    background: #ffffff;
+}
+
+.restock-control input:focus {
+    border-color: #146c43;
+    box-shadow: 0 0 0 3px rgba(20, 108, 67, 0.13);
+}
+
+.restock-error {
+    grid-column: 1 / -1;
+}
+
 .empty-state {
     padding: 56px 24px;
     border: 1px dashed #b9c5be;
@@ -261,6 +376,10 @@ a {
     margin: 0 0 8px;
     font-size: 22px;
     letter-spacing: 0;
+}
+
+.empty-actions {
+    margin-top: 22px;
 }
 
 .detail-layout {
@@ -279,6 +398,12 @@ a {
     background: #e9eee9;
     color: #64726a;
     font-weight: 800;
+}
+
+.detail-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
 }
 
 .detail-copy {
@@ -324,6 +449,50 @@ a {
     margin-top: 4px;
     overflow-wrap: anywhere;
     font-weight: 750;
+}
+
+.cart-product {
+    display: grid;
+    min-width: 0;
+    grid-template-columns: 72px minmax(0, 1fr);
+    align-items: center;
+    gap: 14px;
+}
+
+.cart-product-media {
+    display: grid;
+    width: 72px;
+    aspect-ratio: 1;
+    place-items: center;
+    overflow: hidden;
+    border-radius: 5px;
+    color: #829088;
+    background: #eef1ef;
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+}
+
+.cart-product-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.cart-product-link {
+    display: inline-block;
+    color: #12372a;
+    text-decoration: none;
+}
+
+.cart-product-link:hover {
+    text-decoration: underline;
+}
+
+.cart-product-price {
+    margin-top: 5px;
+    color: #68736d;
+    font-size: 13px;
 }
 
 .summary-band {
@@ -411,7 +580,8 @@ a {
     font-weight: 750;
 }
 
-.field input {
+.field input,
+.field textarea {
     width: 100%;
     min-height: 46px;
     padding: 10px 12px;
@@ -422,9 +592,26 @@ a {
     background: #ffffff;
 }
 
-.field input:focus {
+.field textarea {
+    min-height: 132px;
+    resize: vertical;
+}
+
+.field input:focus,
+.field textarea:focus {
     border-color: #146c43;
     box-shadow: 0 0 0 3px rgba(20, 108, 67, 0.13);
+}
+
+.field-error {
+    margin: 0;
+    color: #b42318;
+    font-size: 13px;
+    font-weight: 650;
+}
+
+.detail-actions {
+    margin-top: 24px;
 }
 
 .card-list {
@@ -502,6 +689,11 @@ a {
     .data-row {
         grid-template-columns: 1fr;
     }
+
+    .restock-panel {
+        grid-template-columns: 1fr;
+        align-items: stretch;
+    }
 }
 
 @media (max-width: 480px) {
@@ -529,6 +721,19 @@ a {
     .form-actions,
     .result-actions {
         display: grid;
+        width: 100%;
+    }
+
+    .inline-action,
+    .inline-action .button {
+        width: 100%;
+    }
+
+    .restock-form {
+        grid-template-columns: 1fr;
+    }
+
+    .restock-form .button {
         width: 100%;
     }
 }

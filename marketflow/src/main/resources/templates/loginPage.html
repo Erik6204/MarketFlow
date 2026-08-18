@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Ошибка входа | MarketFlow</title>
+    <title>Вход | MarketFlow</title>
     <link rel="stylesheet" th:href="@{/css/auth.css}" href="/css/auth.css">
 </head>
 <body>
@@ -15,15 +15,13 @@
 
         <section class="centered-section" aria-labelledby="login-title">
             <div class="form-content">
-                <div class="inline-alert" role="alert">
-                    Неверный email или пароль. Проверьте данные и попробуйте ещё раз.
-                </div>
-                <p class="eyebrow">Повторная попытка</p>
+                <p class="eyebrow">Личный кабинет</p>
                 <h1 id="login-title">Вход</h1>
+                <p class="supporting-text">Введите данные своего аккаунта.</p>
 
                 <form class="auth-form"
-                      th:action="@{/login/success}"
-                      action="/login/success"
+                      th:action="@{/login}"
+                      action="/login"
                       method="post">
                     <div class="field">
                         <label for="email">Email</label>
@@ -50,6 +48,11 @@
                         Войти
                     </button>
                 </form>
+
+                <p class="footer-link">
+                    Нет аккаунта?
+                    <a th:href="@{/register}" href="/register">Зарегистрироваться</a>
+                </p>
             </div>
         </section>
     </main>

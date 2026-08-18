@@ -1,17 +1,16 @@
 package com.example.marketflow.cart;
 
-import lombok.Getter;
+import java.math.BigDecimal;
 
-@Getter
-public class CartitemDto {
-    private Long buyerid;
-    private Long productid;
-    private Integer quantity;
-    private Boolean selected;
-    public CartitemDto(Long buyerid, Long productid) {
-        this.buyerid = buyerid;
-        this.productid = productid;
-        this.quantity = 1;
-        this.selected = true;
-    }
+public record CartitemDto(Long id,
+        Long productId,
+        String productName,
+        BigDecimal price,
+        Integer quantity,
+        Boolean selected,
+        String imageUrl,
+        BigDecimal subtotal
+    ) {
+    
+
 }

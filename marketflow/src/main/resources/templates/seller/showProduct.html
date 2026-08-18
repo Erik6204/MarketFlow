@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Товар продавца | MarketFlow</title>
+    <link rel="stylesheet" th:href="@{/css/market.css}" href="/css/market.css">
+</head>
+<body>
+<header class="market-header">
+    <a class="market-brand" th:href="@{/seller/account}" href="/seller/account">MarketFlow Seller</a>
+    <nav class="market-nav" aria-label="Навигация продавца">
+        <a th:href="@{/seller/account}" href="/seller/account">Мои товары</a>
+        <a th:href="@{/seller/products/new}" href="/seller/products/new">Добавить товар</a>
+        <a th:href="@{/account/catalog}" href="/account/catalog">Режим покупателя</a>
+    </nav>
+</header>
+
+<main class="market-main">
+    <section class="detail-layout">
+        <div class="detail-media">
+            <img th:if="${product.imageUrl != null and !#strings.isEmpty(product.imageUrl)}"
+                 th:src="${product.imageUrl}"
+                 th:alt="${product.name}">
+            <span th:unless="${product.imageUrl != null and !#strings.isEmpty(product.imageUrl)}">
+                Нет изображения
+            </span>
+        </div>
+
+        <div class="detail-copy">
+            <p class="eyebrow">Карточка товара продавца</p>
+            <h1 th:text="${product.name}">Название товара</h1>
+            <p class="detail-description" th:text="${product.description}">Описание товара</p>
+
+            <div class="data-panel">
+                <div class="data-row">
+                    <div>
+                        <div class="data-label">Цена покупателя</div>
+                        <div class="data-value" th:text="${product.price + ' ₽'}">0.00 ₽</div>
+                    </div>
+                    <div>
+                        <div class="data-label">Себестоимость</div>
+                        <div class="data-value" th:text="${product.costPrice + ' ₽'}">0.00 ₽</div>
+                    </div>
+                </div>
+                <div class="data-row">
+                    <div>
+                        <div class="data-label">Остаток</div>
+                        <div class="data-value" th:text="${product.quantity}">0</div>
+                    </div>
+                    <div>
+                        <div class="data-label">Статус</div>
+                        <div class="data-value">
+                            <span class="status-badge"
+                                  th:classappend="${product.active} ? ' status-active' : ' status-disabled'"
+                                  th:text="${product.active} ? 'Активен' : 'Отключён'">
+                                Активен
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <section class="restock-panel" aria-labelledby="restock-title">
+                <div class="restock-copy">
+                    <h2 id="restock-title">Пополнить остаток</h2>
+                    <p>Укажите, сколько единиц нужно добавить к текущему количеству.</p>
+                </div>
+
+                <form class="restock-form"
+                      th:action="@{/seller/products/{id}/restock(id=${product.id})}"
+                      th:object="${restock}"
+                      method="post">
+                    <div class="restock-control">
+                        <label for="restockAmount">Количество</label>
+                        <input id="restockAmount"
+                               type="number"
+                               th:field="*{amount}"
+                               min="1"
+                               step="1"
+                               inputmode="numeric"
+                               required>
+                    </div>
+                    <button class="button button-primary" type="submit">Пополнить</button>
+                    <p class="field-error restock-error"
+                       th:if="${#fields.hasErrors('amount')}"
+                       th:errors="*{amount}">
+                        Ошибка количества
+                    </p>
+                </form>
+            </section>
+
+            <div class="form-actions detail-actions">
+                <a class="button button-primary"
+                   th:href="@{/seller/products/{id}/edit(id=${product.id})}"
+                   href="/seller/products/1/edit">
+                    Редактировать товар
+                </a>
+
+                <form class="inline-action"
+                      th:if="${product.active}"
+                      th:action="@{/seller/products/{id}/disable(id=${product.id})}"
+                      method="post"
+                      onsubmit="return confirm('Отключить товар и скрыть его из каталога?');">
+                    <button class="button button-danger" type="submit">Отключить товар</button>
+                </form>
+
+                <form class="inline-action"
+                      th:if="${!product.active and product.quantity != null and product.quantity > 0}"
+                      th:action="@{/seller/products/{id}/enable(id=${product.id})}"
+                      method="post">
+                    <button class="button button-primary" type="submit">Включить товар</button>
+                </form>
+
+                <button class="button button-secondary"
+                        th:if="${!product.active and (product.quantity == null or product.quantity <= 0)}"
+                        type="button"
+                        disabled
+                        title="Сначала пополните остаток товара">
+                    Включить товар
+                </button>
+
+                <a class="button button-secondary" th:href="@{/seller/account}" href="/seller/account">
+                    Вернуться к товарам
+                </a>
+            </div>
+
+            <p class="action-hint"
+               th:if="${!product.active and (product.quantity == null or product.quantity <= 0)}">
+                Чтобы включить товар, сначала пополните его остаток.
+            </p>
+        </div>
+    </section>
+</main>
+</body>
+</html>

@@ -16,13 +16,77 @@ public class GlobalMvcExceptionHandler {
             Model model
     ) {
         model.addAttribute("message", exception.getMessage());
-        return "register-duplicate";
+        return "registerDuplicate";
     }
 
     @ExceptionHandler(InvalidCredentialsException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public String handleInvalidCredentials(
+            InvalidCredentialsException exception,
+            Model model
+    ) {
+        model.addAttribute("message", exception.getMessage());
+        return "loginUnsuccessful";
+    }
+    @ExceptionHandler(UserNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String handleUserNotFoundException(UserNotFoundException exception,Model model){
+        model.addAttribute("message",exception.getMessage());
+        return "error";
+    }
+
+    @ExceptionHandler(ProductNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String handleProductNotFoundException(ProductNotFoundException exception,Model model){
+        model.addAttribute("message", exception.getMessage());
+        return "error";
+    }
+
+    @ExceptionHandler(CartItemNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String handleCartItemNotFoundException(CartItemNotFoundException exception,Model model){
+        model.addAttribute("message", exception.getMessage());
+        return "error";
+    }
+    
+    @ExceptionHandler(ProductUnavailableException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public String handleProductUnavailableException(ProductUnavailableException exception,Model model){
+        model.addAttribute("message", exception.getMessage());
+        return "error";
+    }
+    
+    @ExceptionHandler(InsufficientStockException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public String handleInsufficientStockException(InsufficientStockException exception,Model model){
+        model.addAttribute("message", exception.getMessage());
+        return "error";
+    }
+
+    @ExceptionHandler(InvalidQuantityException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public String function2(InvalidCredentialsException message,Model model){
-        model.addAttribute("message",message.getMessage());
-        return "Page1";
+    public String handleInvalidQuantityException(InvalidQuantityException exception,Model model){
+        model.addAttribute("message", exception.getMessage());
+        return "error";
+    }
+
+    @ExceptionHandler(NoSelectedCartItemsException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public String handleNoSelectedCartItems(
+            NoSelectedCartItemsException exception,
+            Model model
+    ) {
+        model.addAttribute("message", exception.getMessage());
+        return "error";
+    }
+
+    @ExceptionHandler(SellerAccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public String handleSellerAccessDeniedException(
+            SellerAccessDeniedException exception,
+            Model model
+    ) {
+        model.addAttribute("message", exception.getMessage());
+        return "error";
     }
 }
