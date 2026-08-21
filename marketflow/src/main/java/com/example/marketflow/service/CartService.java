@@ -69,10 +69,10 @@ public class CartService {
             .stream()
             .map(item -> {
                 ProductEntity product = rep
-                        .findById(item.getProductid())
+                        .findById(item.getProductId())
                         .orElseThrow(() ->
                                 new ProductNotFoundException(
-                                        item.getProductid()
+                                        item.getProductId()
                                 )
                         );
 
@@ -96,9 +96,9 @@ public class CartService {
 
         CartItemEntity item = findOwnedCartItem(id, buyerId);
 
-        ProductEntity product = rep.findById(item.getProductid())
+        ProductEntity product = rep.findById(item.getProductId())
                 .orElseThrow(
-                        () -> new ProductNotFoundException(item.getProductid())
+                        () -> new ProductNotFoundException(item.getProductId())
                 );
 
         if (!Boolean.TRUE.equals(product.getActive())) {

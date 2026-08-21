@@ -32,7 +32,20 @@
             <div class="data-label">Итого к оплате</div>
             <div class="summary-total" th:text="${sum + ' ₽'}">0.00 ₽</div>
         </div>
-        <a class="button button-primary" th:href="@{/account/account/cards}" href="/account/account/cards">Выбрать карту</a>
+
+        <div class="summary-action">
+            <form th:if="${sum != null and sum.signum() > 0}"
+                  th:action="@{/account/orders}"
+                  action="/account/orders"
+                  method="post">
+                <button class="button button-primary" type="submit">Оформить заказ</button>
+            </form>
+
+            <div th:if="${sum == null or sum.signum() <= 0}">
+                <button class="button button-primary" type="button" disabled>Оформить заказ</button>
+                <p class="summary-hint">Выберите хотя бы один товар в корзине.</p>
+            </div>
+        </div>
     </section>
 </main>
 </body>

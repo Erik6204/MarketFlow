@@ -513,6 +513,29 @@ a {
     font-weight: 850;
 }
 
+.summary-action {
+    display: grid;
+    justify-items: end;
+    gap: 8px;
+}
+
+.summary-action form {
+    margin: 0;
+}
+
+.summary-action .button:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+.summary-hint {
+    max-width: 260px;
+    margin: 8px 0 0;
+    color: #68736d;
+    font-size: 13px;
+    text-align: right;
+}
+
 .result-wrap,
 .form-wrap {
     display: grid;
@@ -675,6 +698,17 @@ a {
     .summary-band {
         align-items: flex-start;
         flex-direction: column;
+    }
+
+    .summary-action,
+    .summary-action form,
+    .summary-action .button {
+        width: 100%;
+    }
+
+    .summary-hint {
+        max-width: none;
+        text-align: left;
     }
 
     .product-grid {
