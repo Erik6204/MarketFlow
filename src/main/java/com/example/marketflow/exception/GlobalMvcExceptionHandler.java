@@ -89,4 +89,61 @@ public class GlobalMvcExceptionHandler {
         model.addAttribute("message", exception.getMessage());
         return "error";
     }
+
+    @ExceptionHandler(OrderNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String handleOrderNotFound(OrderNotFoundException exception, Model model) {
+        model.addAttribute("message", exception.getMessage());
+        return "error";
+    }
+
+    @ExceptionHandler(PaymentCardNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String handlePaymentCardNotFound(
+            PaymentCardNotFoundException exception,
+            Model model
+    ) {
+        model.addAttribute("message", exception.getMessage());
+        return "error";
+    }
+
+    @ExceptionHandler(InsufficientFundsException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public String handleInsufficientFunds(
+            InsufficientFundsException exception,
+            Model model
+    ) {
+        model.addAttribute("message", exception.getMessage());
+        return "error";
+    }
+
+    @ExceptionHandler(PaymentAlreadyProcessedException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public String handlePaymentAlreadyProcessed(
+            PaymentAlreadyProcessedException exception,
+            Model model
+    ) {
+        model.addAttribute("message", exception.getMessage());
+        return "error";
+    }
+
+    @ExceptionHandler(WalletAccountNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String handleWalletAccountNotFound(
+            WalletAccountNotFoundException exception,
+            Model model
+    ) {
+        model.addAttribute("message", exception.getMessage());
+        return "error";
+    }
+
+    @ExceptionHandler(OwnerWalletAccountNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String handleOwnerWalletAccountNotFound(
+            OwnerWalletAccountNotFoundException exception,
+            Model model
+    ) {
+        model.addAttribute("message", exception.getMessage());
+        return "error";
+    }
 }
