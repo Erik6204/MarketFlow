@@ -103,7 +103,7 @@ com.erik.marketflow
 2. Создать ветку `main`.
 3. Добавить `.gitignore` для Java, Maven, IDE, `.env`, логов и `target`.
 4. Создать `.env.example` без настоящих секретов.
-5. Зафиксировать `PROJECT_IDEA.md` и этот документ.
+5. Зафиксировать `docs/project-idea.md` и `docs/technical-specification.md`.
 6. Создать папку `docs` для будущих схем и решений.
 
 ## Результат

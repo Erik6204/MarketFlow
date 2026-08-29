@@ -1,0 +1,93 @@
+@startuml
+title MarketFlow - Database ERD
+
+hide methods
+hide stereotypes
+skinparam linetype ortho
+skinparam shadowing false
+
+entity users {
+  * id : BIGINT <<PK>>
+  --
+  email : VARCHAR(320) <<UK>>
+  password_hash : VARCHAR(255)
+  display_name : VARCHAR(100)
+  status : VARCHAR(30)
+  created_at : TIMESTAMPTZ
+  updated_at : TIMESTAMPTZ
+}
+
+entity roles {
+  * id : SMALLINT <<PK>>
+  --
+  name : VARCHAR(40) <<UK>>
+}
+
+entity user_roles {
+  * user_id : BIGINT <<PK, FK>>
+  * role_id : SMALLINT <<PK, FK>>
+}
+
+entity products {
+  * id : BIGINT <<PK>>
+  --
+  seller_id : BIGINT <<FK>>
+  name : VARCHAR(200)
+  price : NUMERIC(12,2)
+  quantity : INTEGER
+  active : BOOLEAN
+}
+
+entity cart_items {
+  * id : BIGINT <<PK>>
+  --
+  buyer_id : BIGINT <<FK>>
+  product_id : BIGINT <<FK>>
+  quantity : INTEGER
+  selected : BOOLEAN
+}
+
+entity orders {
+  * id : BIGINT <<PK>>
+  --
+  buyer_id : BIGINT <<FK>>
+  status : VARCHAR(30)
+  total_amount : NUMERIC(14,2)
+  created_at : TIMESTAMPTZ
+  updated_at : TIMESTAMPTZ
+}
+
+entity order_items {
+  * id : BIGINT <<PK>>
+  --
+  order_id : BIGINT <<FK>>
+  product_id : BIGINT <<FK>>
+  seller_id : BIGINT <<FK>>
+  product_name : VARCHAR(200)
+  unit_price : NUMERIC(12,2)
+  quantity : INTEGER
+  total_price : NUMERIC(14,2)
+}
+
+entity payment_cards {
+  * id : BIGINT <<PK>>
+  --
+  user_id : BIGINT <<FK>>
+  card_token : VARCHAR(100) <<UK>>
+  masked_number : VARCHAR(30)
+  balance : NUMERIC(14,2)
+  active : BOOLEAN
+}
+
+users ||--o{ user_roles
+roles ||--o{ user_roles
+users ||--o{ products : seller
+users ||--o{ cart_items : buyer
+products ||--o{ cart_items
+users ||--o{ orders : buyer
+orders ||--|{ order_items
+products ||--o{ order_items
+users ||--o{ order_items : seller
+users ||--o{ payment_cards
+
+@enduml

@@ -76,22 +76,35 @@ The codebase separates common buyer flows from seller-specific controllers and s
 | `payment_cards` | Simulated user payment cards |
 | `flyway_schema_history` | Applied migration history |
 
+## Documentation
+
+- [Project idea](docs/project-idea.md)
+- [Technical specification](docs/technical-specification.md)
+- [Architecture](docs/architecture.md)
+- [Database](docs/database.md)
+- [API development](docs/api-development.md)
+- [Implementation tasks](docs/tasks/README.md)
+
 ## Project structure
 
 ```text
 MarketFlow/
+├── .mvn/
+├── docs/
+│   ├── architecture.md
+│   ├── api-development.md
+│   ├── database.md
+│   ├── diagrams/
+│   └── tasks/
+├── src/
+├── .editorconfig
+├── .env.example
+├── LICENSE
+├── pom.xml
+├── mvnw
+├── mvnw.cmd
 ├── README.md
-├── README.ru.md
-├── PROJECT_IDEA.md
-├── TECHNICAL_SPECIFICATION.md
-└── marketflow/
-    ├── pom.xml
-    └── src/
-        ├── main/java/com/example/marketflow/
-        └── main/resources/
-            ├── db/migration/
-            ├── static/
-            └── templates/
+└── README.ru.md
 ```
 
 ## Running locally
@@ -102,7 +115,7 @@ MarketFlow/
 - PostgreSQL
 - Git
 
-Create a PostgreSQL database, then create a `.env` file either in the repository root or in the `marketflow` module:
+Create a PostgreSQL database, copy `.env.example` to `.env`, and provide your local credentials:
 
 ```env
 DB_URL=jdbc:postgresql://localhost:5432/marketflow
@@ -111,12 +124,6 @@ DB_PASSWORD=change_me
 ```
 
 Never commit the real `.env` file.
-
-Enter the application module:
-
-```bash
-cd marketflow
-```
 
 Run on Linux or macOS:
 

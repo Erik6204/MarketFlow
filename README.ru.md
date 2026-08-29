@@ -76,22 +76,35 @@ HTTP request
 | `payment_cards` | Тестовые платёжные карты пользователей |
 | `flyway_schema_history` | История применённых миграций |
 
+## Документация
+
+- [Идея проекта](docs/project-idea.md)
+- [Техническое задание](docs/technical-specification.md)
+- [Архитектура](docs/architecture.md)
+- [База данных](docs/database.md)
+- [Разработка API](docs/api-development.md)
+- [Задания по реализации](docs/tasks/README.md)
+
 ## Структура проекта
 
 ```text
 MarketFlow/
+├── .mvn/
+├── docs/
+│   ├── architecture.md
+│   ├── api-development.md
+│   ├── database.md
+│   ├── diagrams/
+│   └── tasks/
+├── src/
+├── .editorconfig
+├── .env.example
+├── LICENSE
+├── pom.xml
+├── mvnw
+├── mvnw.cmd
 ├── README.md
-├── README.ru.md
-├── PROJECT_IDEA.md
-├── TECHNICAL_SPECIFICATION.md
-└── marketflow/
-    ├── pom.xml
-    └── src/
-        ├── main/java/com/example/marketflow/
-        └── main/resources/
-            ├── db/migration/
-            ├── static/
-            └── templates/
+└── README.ru.md
 ```
 
 ## Локальный запуск
@@ -102,7 +115,7 @@ MarketFlow/
 - PostgreSQL
 - Git
 
-Создай базу данных PostgreSQL, затем добавь файл `.env` в корень репозитория или в модуль `marketflow`:
+Создай базу данных PostgreSQL, скопируй `.env.example` в `.env` и укажи локальные данные подключения:
 
 ```env
 DB_URL=jdbc:postgresql://localhost:5432/marketflow
@@ -111,12 +124,6 @@ DB_PASSWORD=change_me
 ```
 
 Не добавляй настоящий `.env` в Git.
-
-Перейди в модуль приложения:
-
-```bash
-cd marketflow
-```
 
 Запуск на Linux или macOS:
 
