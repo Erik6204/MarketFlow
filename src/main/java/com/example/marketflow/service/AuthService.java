@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.marketflow.Repository.UserRepository;
+import com.example.marketflow.Repository.WalletAccountRepository;
 import com.example.marketflow.Repository.userRoleRepository;
 import com.example.marketflow.User.LoginRequest;
 import com.example.marketflow.User.RegisterRequest;
@@ -14,6 +15,7 @@ import com.example.marketflow.User.UserMapper;
 import com.example.marketflow.exception.EmailAlreadyExistsException;
 import com.example.marketflow.exception.InvalidCredentialsException;
 import com.example.marketflow.exception.UserNotFoundException;
+import com.example.marketflow.payment.WalletAccountEntity;
 import com.example.marketflow.userRoles.UserRoleId;
 import com.example.marketflow.userRoles.UserRolesEntity;
 
@@ -26,7 +28,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final userRoleRepository repository;
-
+    private final WalletAccountRepository WAR;
 
     @Transactional
     public void register(RegisterRequest userDto) {
@@ -50,7 +52,12 @@ public class AuthService {
             case BUYER -> 1;
             case SELLER -> 2;
         };
-        if (roleId==2){repository.save(new UserRolesEntity(savedUser.getId(),(short) 1));}
+
+        if (roleId == 2) {
+            repository.save(new UserRolesEntity(savedUser.getId(), (short) 1));
+            WAR.save(new WalletAccountEntity(savedUser.getId()));
+        }
+
         repository.save(new UserRolesEntity(savedUser.getId(), roleId));
     }
 
@@ -80,11 +87,8 @@ public class AuthService {
                 .orElseThrow(()-> new UserNotFoundException(id));
     }
 
-    @Transactional(readOnly=true)
-    public Boolean isSeller(Long id){
-        return repository.existsById(new UserRoleId(id,(short)2));
+    @Transactional(readOnly = true)
+    public Boolean isSeller(Long id) {
+        return repository.existsById(new UserRoleId(id, (short) 2));
     }
-
-    
-    
 }

@@ -6,6 +6,8 @@ import java.time.Instant;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.example.marketflow.payment.PaymentStatus;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -36,6 +38,10 @@ public class OrderEntity {
     @Column(nullable = false)
     private OrderStatus status;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_status", nullable = false)
+    private PaymentStatus paymentStatus;
+
     @Column(name = "total_amount", nullable = false)
     @DecimalMin(value = "0.01")
     private BigDecimal totalPrice;
@@ -55,10 +61,14 @@ public class OrderEntity {
     ) {
         this.buyerId = buyerId;
         this.status = status;
+        this.paymentStatus = PaymentStatus.NOT_PAID;
         this.totalPrice = totalPrice;
     }
 
     public void changeStatus(OrderStatus status) {
         this.status = status;
+    }
+    public void changePaymentStatus(PaymentStatus paymentStatus) {
+        this.paymentStatus = paymentStatus;
     }
 }
