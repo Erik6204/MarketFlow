@@ -18,12 +18,12 @@ public interface WalletAccountRepository extends JpaRepository<WalletAccountEnti
     boolean existsByUserId(Long userId);
 
     @Modifying
-    @Query("""
-            UPDATE WalletAccountEntity wallet
-            SET wallet.balance = wallet.balance + :amount,
-                wallet.updatedAt = CURRENT_TIMESTAMP
-            WHERE wallet.userId = :userId
-            """)
+    @Query(value = """
+            UPDATE wallet_accounts
+            SET balance = balance + :amount,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE user_id = :userId
+            """, nativeQuery = true)
     int increaseBalance(
             @Param("userId") Long userId,
             @Param("amount") BigDecimal amount
