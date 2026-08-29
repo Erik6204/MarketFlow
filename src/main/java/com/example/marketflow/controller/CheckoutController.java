@@ -19,7 +19,7 @@ public class CheckoutController {
     private final CheckoutService checkoutService;
 
     @GetMapping("/checkout")
-    public String CountPrice(HttpSession session,Model model){
+    public String CountPrice(HttpSession session, Model model) {
         Long userId =
             (Long) session.getAttribute("userId");
 

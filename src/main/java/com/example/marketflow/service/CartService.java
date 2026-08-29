@@ -30,7 +30,7 @@ public class CartService {
     
 
     private CartItemEntity findOwnedCartItem(Long itemId, Long buyerId) {
-        return repost.findByIdAndBuyerid(itemId, buyerId).orElseThrow(
+        return repost.findByIdAndBuyerId(itemId, buyerId).orElseThrow(
                 () -> new CartItemNotFoundException()
         );
     }
@@ -46,7 +46,7 @@ public class CartService {
         }
 
         Optional<CartItemEntity> existingItem =
-                repost.findByBuyeridAndProductid(buyerId, productId);
+                repost.findByBuyerIdAndProductId(buyerId, productId);
 
         int newQuantity = existingItem
                 .map(item -> item.getQuantity() + 1)
@@ -65,7 +65,7 @@ public class CartService {
 
     @Transactional(readOnly = true)
     public List<CartitemDto> getUserCartItems(Long buyerId) {
-        return repost.findAllByBuyerid(buyerId)
+        return repost.findAllByBuyerId(buyerId)
             .stream()
             .map(item -> {
                 ProductEntity product = rep
