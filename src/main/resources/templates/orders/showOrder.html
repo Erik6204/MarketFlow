@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${'Заказ №' + order.id + ' | MarketFlow'}">Заказ | MarketFlow</title>
+    <link rel="stylesheet" th:href="@{/css/market.css}" href="/css/market.css">
+</head>
+<body>
+<header class="market-header">
+    <a class="market-brand" th:href="@{/account/catalog}" href="/account/catalog">MarketFlow</a>
+    <nav class="market-nav" aria-label="Основная навигация">
+        <a th:href="@{/account/catalog}" href="/account/catalog">Каталог</a>
+        <a th:href="@{/account/cart}" href="/account/cart">Корзина</a>
+        <a th:href="@{/account/account/cards}" href="/account/account/cards">Карты</a>
+        <a th:href="@{/Buyer/account}" href="/Buyer/account">Профиль</a>
+    </nav>
+</header>
+
+<main class="market-main">
+    <div class="page-heading">
+        <div>
+            <p class="eyebrow">Детали покупки</p>
+            <h1>Заказ №<span th:text="${order.id}">1</span></h1>
+            <p class="muted">Цены и названия зафиксированы на момент оформления заказа.</p>
+        </div>
+        <a class="button button-secondary" th:href="@{/account/catalog}" href="/account/catalog">
+            Вернуться в каталог
+        </a>
+    </div>
+
+    <section class="order-overview" aria-label="Основная информация о заказе">
+        <div class="order-overview-item">
+            <div class="data-label">Статус</div>
+            <div class="data-value" th:switch="${order.status.name()}">
+                <span class="status-badge order-status-created" th:case="'CREATED'">Создан</span>
+                <span class="status-badge order-status-confirmed" th:case="'CONFIRMED'">Подтверждён</span>
+                <span class="status-badge order-status-processing" th:case="'PROCESSING'">В обработке</span>
+                <span class="status-badge order-status-completed" th:case="'COMPLETED'">Завершён</span>
+                <span class="status-badge order-status-cancelled" th:case="'CANCELLED'">Отменён</span>
+                <span class="status-badge" th:case="*" th:text="${order.status}">Статус</span>
+            </div>
+        </div>
+
+        <div class="order-overview-item">
+            <div class="data-label">Оплата</div>
+            <div class="data-value" th:switch="${order.paymentStatus.name()}">
+                <span class="status-badge payment-status-not-paid" th:case="'NOT_PAID'">
+                    Не оплачено
+                </span>
+                <span class="status-badge payment-status-processing" th:case="'PROCESSING'">
+                    Обрабатывается
+                </span>
+                <span class="status-badge payment-status-paid" th:case="'PAID'">
+                    Оплачено
+                </span>
+                <span class="status-badge payment-status-failed" th:case="'FAILED'">
+                    Ошибка оплаты
+                </span>
+                <span class="status-badge payment-status-refunded" th:case="'REFUNDED'">
+                    Возвращено
+                </span>
+                <span class="status-badge" th:case="*" th:text="${order.paymentStatus}">
+                    Статус оплаты
+                </span>
+            </div>
+        </div>
+
+        <div class="order-overview-item">
+            <div class="data-label">Дата создания</div>
+            <time class="data-value"
+                  th:datetime="${order.createdAt}"
+                  th:text="${order.createdAt}">
+                2026-08-23T00:00:00Z
+            </time>
+        </div>
+
+        <div class="order-overview-item order-overview-total">
+            <div class="data-label">Итого</div>
+            <div class="data-value" th:text="${order.totalPrice + ' ₽'}">0.00 ₽</div>
+        </div>
+    </section>
+
+    <section class="order-items-section" aria-labelledby="order-items-title">
+        <div class="order-section-heading">
+            <div>
+                <p class="eyebrow">Состав заказа</p>
+                <h2 id="order-items-title">Товары</h2>
+            </div>
+            <span class="order-items-count"
+                  th:if="${order.items != null}"
+                  th:text="${order.items.size() + ' поз.'}">
+                0 поз.
+            </span>
+        </div>
+
+        <div class="order-items" th:if="${order.items != null and !order.items.isEmpty()}">
+            <article class="order-item" th:each="item : ${order.items}">
+                <div class="order-product">
+                    <div class="order-product-media">
+                        <img th:if="${item.imageUrl != null and !#strings.isEmpty(item.imageUrl)}"
+                             th:src="${item.imageUrl}"
+                             th:alt="${item.productName}">
+                        <span th:unless="${item.imageUrl != null and !#strings.isEmpty(item.imageUrl)}">
+                            Нет фото
+                        </span>
+                    </div>
+                    <div class="order-product-copy">
+                        <div class="data-label">Товар</div>
+                        <h3 th:text="${item.productName}">Название товара</h3>
+                        <p th:text="${'Продавец #' + item.sellerId}">Продавец #1</p>
+                    </div>
+                </div>
+
+                <div class="order-item-value">
+                    <div class="data-label">Цена за единицу</div>
+                    <div class="data-value" th:text="${item.unitPrice + ' ₽'}">0.00 ₽</div>
+                </div>
+
+                <div class="order-item-value">
+                    <div class="data-label">Количество</div>
+                    <div class="data-value" th:text="${item.quantity}">1</div>
+                </div>
+
+                <div class="order-item-value order-item-total">
+                    <div class="data-label">Сумма</div>
+                    <div class="data-value" th:text="${item.totalPrice + ' ₽'}">0.00 ₽</div>
+                </div>
+            </article>
+        </div>
+
+        <div class="empty-state" th:if="${order.items == null or order.items.isEmpty()}">
+            <h2>В заказе нет позиций</h2>
+            <p class="muted">Информация о товарах заказа отсутствует.</p>
+        </div>
+    </section>
+
+    <section class="order-total-panel" th:if="${order.items != null and !order.items.isEmpty()}">
+        <div>
+            <div class="data-label">Итоговая стоимость заказа</div>
+            <p>Сумма рассчитана по ценам, сохранённым при оформлении.</p>
+        </div>
+        <strong th:text="${order.totalPrice + ' ₽'}">0.00 ₽</strong>
+    </section>
+    <section class="order-payment-actions" aria-label="Оплата заказа">
+        <a class="button button-primary"
+           th:if="${order.paymentStatus.name() == 'NOT_PAID' or order.paymentStatus.name() == 'FAILED'}"
+           th:href="@{/account/orders/{id}/payment(id=${order.id})}"
+           href="/account/orders/1/payment">
+            Перейти к оплате
+        </a>
+
+        <p class="muted"
+           th:if="${order.paymentStatus.name() == 'PAID'}">
+            Заказ уже оплачен.
+        </p>
+    </section>
+</main>
+</body>
+</html>

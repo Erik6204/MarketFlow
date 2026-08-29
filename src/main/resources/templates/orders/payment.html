@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${'Оплата заказа №' + payment.orderId + ' | MarketFlow'}">
+        Оплата заказа | MarketFlow
+    </title>
+    <link rel="stylesheet" th:href="@{/css/market.css}" href="/css/market.css">
+</head>
+<body>
+<header class="market-header">
+    <a class="market-brand" th:href="@{/account/catalog}" href="/account/catalog">
+        MarketFlow
+    </a>
+    <nav class="market-nav" aria-label="Основная навигация">
+        <a th:href="@{/account/catalog}" href="/account/catalog">Каталог</a>
+        <a th:href="@{/account/cart}" href="/account/cart">Корзина</a>
+        <a th:href="@{/account/account/cards}" href="/account/account/cards">Карты</a>
+        <a th:href="@{/Buyer/account}" href="/Buyer/account">Профиль</a>
+    </nav>
+</header>
+
+<main class="market-main payment-checkout"
+      th:with="canPay=${payment.paymentStatus.name() == 'NOT_PAID' or payment.paymentStatus.name() == 'FAILED'}">
+    <div class="page-heading">
+        <div>
+            <p class="eyebrow">Безопасная оплата</p>
+            <h1>Оплата заказа №<span th:text="${payment.orderId}">1</span></h1>
+            <p class="muted">Выберите активную карту, с которой будет выполнена оплата.</p>
+        </div>
+        <a class="button button-secondary"
+           th:href="@{/account/orders/{id}(id=${payment.orderId})}"
+           href="/account/orders/1">
+            Вернуться к заказу
+        </a>
+    </div>
+
+    <div class="payment-checkout-layout">
+        <section class="payment-choice-panel" aria-labelledby="payment-cards-title">
+            <div class="payment-section-heading">
+                <div>
+                    <p class="eyebrow">Способ оплаты</p>
+                    <h2 id="payment-cards-title">Выберите карту</h2>
+                </div>
+                <span class="payment-card-count"
+                      th:text="${payment.cards.size() + ' шт.'}">
+                    0 шт.
+                </span>
+            </div>
+
+            <form class="payment-form"
+                  th:if="${canPay and !payment.cards.isEmpty()}"
+                  th:action="@{/account/orders/{id}/payment(id=${payment.orderId})}"
+                  method="post">
+                <input type="hidden"
+                       name="idempotencyKey"
+                       th:value="${payment.idempotencyKey}">
+
+                <fieldset class="payment-options">
+                    <legend class="sr-only">Банковские карты</legend>
+
+                    <label class="payment-option" th:each="card, iteration : ${payment.cards}">
+                        <input type="radio"
+                               name="cardId"
+                               th:value="${card.id}"
+                               th:checked="${iteration.first}"
+                               required>
+
+                        <span class="payment-option-copy">
+                            <span class="payment-option-number"
+                                  th:text="${card.maskedNumber}">
+                                **** **** **** 1234
+                            </span>
+                            <span class="payment-option-balance">
+                                Доступно:
+                                <strong th:text="${card.balance + ' ₽'}">0.00 ₽</strong>
+                            </span>
+                        </span>
+
+                        <span class="payment-option-mark" aria-hidden="true"></span>
+                    </label>
+                </fieldset>
+
+                <div class="payment-form-actions">
+                    <button class="button button-primary" type="submit">
+                        Оплатить
+                        <span th:text="${payment.totalPrice + ' ₽'}">0.00 ₽</span>
+                    </button>
+                    <p class="payment-form-hint">
+                        После подтверждения сумма будет списана с выбранной карты.
+                    </p>
+                </div>
+            </form>
+
+            <div class="payment-empty-state"
+                 th:if="${canPay and payment.cards.isEmpty()}">
+                <h2>Нет активных карт</h2>
+                <p class="muted">
+                    Добавьте карту, чтобы перейти к оплате этого заказа.
+                </p>
+                <a class="button button-primary"
+                   th:href="@{/account/cards/add}"
+                   href="/account/cards/add">
+                    Добавить карту
+                </a>
+            </div>
+
+            <div class="payment-empty-state" th:unless="${canPay}">
+                <h2>Оплата недоступна</h2>
+                <p class="muted" th:switch="${payment.paymentStatus.name()}">
+                    <span th:case="'PAID'">Этот заказ уже оплачен.</span>
+                    <span th:case="'PROCESSING'">Платёж этого заказа уже обрабатывается.</span>
+                    <span th:case="'REFUNDED'">По этому заказу выполнен возврат.</span>
+                    <span th:case="*">Текущий статус не допускает повторную оплату.</span>
+                </p>
+            </div>
+        </section>
+
+        <aside class="payment-summary" aria-label="Сводка оплаты">
+            <p class="eyebrow">Ваш заказ</p>
+            <h2>К оплате</h2>
+            <strong class="payment-summary-total"
+                    th:text="${payment.totalPrice + ' ₽'}">
+                0.00 ₽
+            </strong>
+
+            <div class="payment-summary-row">
+                <span>Заказ</span>
+                <strong>№<span th:text="${payment.orderId}">1</span></strong>
+            </div>
+
+            <div class="payment-summary-row">
+                <span>Статус оплаты</span>
+                <span th:switch="${payment.paymentStatus.name()}">
+                    <strong class="status-badge payment-status-not-paid" th:case="'NOT_PAID'">
+                        Не оплачено
+                    </strong>
+                    <strong class="status-badge payment-status-processing" th:case="'PROCESSING'">
+                        Обрабатывается
+                    </strong>
+                    <strong class="status-badge payment-status-paid" th:case="'PAID'">
+                        Оплачено
+                    </strong>
+                    <strong class="status-badge payment-status-failed" th:case="'FAILED'">
+                        Ошибка оплаты
+                    </strong>
+                    <strong class="status-badge payment-status-refunded" th:case="'REFUNDED'">
+                        Возвращено
+                    </strong>
+                    <strong class="status-badge" th:case="*" th:text="${payment.paymentStatus}">
+                        Статус
+                    </strong>
+                </span>
+            </div>
+
+            <p class="payment-security-note">
+                В интерфейс передаются только замаскированные номера карт. Токены карт остаются на сервере.
+            </p>
+        </aside>
+    </div>
+</main>
+</body>
+</html>
