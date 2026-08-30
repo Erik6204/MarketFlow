@@ -1,0 +1,245 @@
+openapi: 3.0.3
+
+info:
+  title: MarketFlow API
+  version: 0.1.0
+  description: |
+    REST API contract for the MarketFlow multi-vendor marketplace.
+
+    This initial version covers read-only access to the public product catalogue.
+    Only active products with a positive available quantity are exposed.
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+tags:
+  - name: Products
+    description: Public product catalogue
+
+paths:
+  /api/v1/products:
+    get:
+      tags:
+        - Products
+      summary: List available products
+      description: Returns all active products that currently have available stock.
+      operationId: getProducts
+      security: []
+      responses:
+        '200':
+          description: Available products returned successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+              examples:
+                productsFound:
+                  summary: Products are available
+                  value:
+                    - id: 10
+                      name: Mechanical Keyboard
+                      description: Compact mechanical keyboard with backlight
+                      price: 7490.00
+                      quantity: 12
+                      imageUrl: https://example.com/images/keyboard.jpg
+                emptyCatalogue:
+                  summary: No products are currently available
+                  value: []
+
+  /api/v1/products/{productId}:
+    get:
+      tags:
+        - Products
+      summary: Get an available product by ID
+      description: |
+        Returns an active product with available stock. A product that exists but
+        is inactive or out of stock is reported as unavailable.
+      operationId: getProductById
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+      responses:
+        '200':
+          description: Product returned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+              example:
+                id: 10
+                name: Mechanical Keyboard
+                description: Compact mechanical keyboard with backlight
+                price: 7490.00
+                quantity: 12
+                imageUrl: https://example.com/images/keyboard.jpg
+        '400':
+          $ref: '#/components/responses/InvalidProductId'
+        '404':
+          $ref: '#/components/responses/ProductNotFound'
+        '409':
+          $ref: '#/components/responses/ProductUnavailable'
+
+components:
+  parameters:
+    ProductId:
+      name: productId
+      in: path
+      required: true
+      description: Unique product identifier
+      schema:
+        type: integer
+        format: int64
+        minimum: 1
+      example: 10
+
+  schemas:
+    Product:
+      type: object
+      description: Product available in the public catalogue
+      required:
+        - id
+        - name
+        - price
+        - quantity
+      properties:
+        id:
+          type: integer
+          format: int64
+          minimum: 1
+          description: Unique product identifier
+          example: 10
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: Product name
+          example: Mechanical Keyboard
+        description:
+          type: string
+          nullable: true
+          description: Detailed product description
+          example: Compact mechanical keyboard with backlight
+        price:
+          type: number
+          minimum: 0
+          exclusiveMinimum: true
+          multipleOf: 0.01
+          description: Product price with two decimal places
+          example: 7490.00
+        quantity:
+          type: integer
+          format: int32
+          minimum: 1
+          description: Currently available product quantity
+          example: 12
+        imageUrl:
+          type: string
+          format: uri
+          maxLength: 1000
+          nullable: true
+          description: URL of the product image
+          example: https://example.com/images/keyboard.jpg
+
+    ApiError:
+      type: object
+      description: Stable error response returned by the REST API
+      required:
+        - timestamp
+        - status
+        - code
+        - message
+        - path
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: Time when the error occurred
+          example: '2026-08-29T12:00:00Z'
+        status:
+          type: integer
+          format: int32
+          description: HTTP response status
+          example: 404
+        code:
+          type: string
+          description: Stable machine-readable application error code
+          example: PRODUCT_NOT_FOUND
+        message:
+          type: string
+          description: Human-readable error description
+          example: Product was not found
+        path:
+          type: string
+          description: Request path that produced the error
+          example: /api/v1/products/42
+        validationErrors:
+          type: array
+          description: Field-level errors for an invalid request
+          items:
+            $ref: '#/components/schemas/ValidationError'
+        traceId:
+          type: string
+          nullable: true
+          description: Request trace identifier used for diagnostics
+          example: 7f5c8f2d3a9b4e11
+
+    ValidationError:
+      type: object
+      required:
+        - field
+        - message
+      properties:
+        field:
+          type: string
+          description: Invalid field or parameter name
+          example: productId
+        message:
+          type: string
+          description: Validation error description
+          example: must be greater than or equal to 1
+
+  responses:
+    InvalidProductId:
+      description: Product ID has an invalid format or value
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          example:
+            timestamp: '2026-08-29T12:00:00Z'
+            status: 400
+            code: INVALID_PRODUCT_ID
+            message: Product ID must be a positive integer
+            path: /api/v1/products/0
+            validationErrors:
+              - field: productId
+                message: must be greater than or equal to 1
+
+    ProductNotFound:
+      description: Product with the requested ID does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          example:
+            timestamp: '2026-08-29T12:00:00Z'
+            status: 404
+            code: PRODUCT_NOT_FOUND
+            message: Product was not found
+            path: /api/v1/products/42
+
+    ProductUnavailable:
+      description: Product exists but is inactive or out of stock
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          example:
+            timestamp: '2026-08-29T12:00:00Z'
+            status: 409
+            code: PRODUCT_UNAVAILABLE
+            message: Product is currently unavailable
+            path: /api/v1/products/42
