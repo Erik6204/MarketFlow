@@ -1,0 +1,460 @@
+openapi: 3.0.3
+
+info:
+  title: MarketFlow Cart API
+  version: 0.1.0
+  description: |
+    REST API contract for the authenticated buyer's shopping cart.
+
+    The buyer is determined from the current HTTP session. Buyer identifiers are
+    therefore not accepted in paths or request bodies.
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+tags:
+  - name: Cart
+    description: Shopping cart operations for the authenticated buyer
+
+security:
+  - sessionCookie: []
+
+paths:
+  /api/v1/cart/items:
+    get:
+      tags:
+        - Cart
+      summary: List cart items
+      description: Returns all items currently stored in the authenticated buyer's cart.
+      operationId: getCartItems
+      responses:
+        '200':
+          description: Cart items returned successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CartItem'
+              examples:
+                cartWithItems:
+                  summary: Cart contains an item
+                  value:
+                    - id: 25
+                      productId: 10
+                      productName: Mechanical Keyboard
+                      price: 7490.00
+                      quantity: 2
+                      selected: true
+                      imageUrl: https://example.com/images/keyboard.jpg
+                      subtotal: 14980.00
+                emptyCart:
+                  summary: Cart is empty
+                  value: []
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+
+    post:
+      tags:
+        - Cart
+      summary: Add a product to the cart
+      description: |
+        Adds one unit of the product to the cart. If the product is already in the
+        cart, its quantity is increased by one.
+      operationId: addProductToCart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddCartItemRequest'
+            example:
+              productId: 10
+      responses:
+        '204':
+          description: Product added to the cart successfully
+        '400':
+          $ref: '#/components/responses/InvalidProductId'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '404':
+          $ref: '#/components/responses/ProductNotFound'
+        '409':
+          $ref: '#/components/responses/CartConflict'
+
+  /api/v1/cart/items/{itemId}/quantity:
+    patch:
+      tags:
+        - Cart
+      summary: Update a cart item quantity
+      description: Replaces the quantity of an item owned by the authenticated buyer.
+      operationId: updateCartItemQuantity
+      parameters:
+        - $ref: '#/components/parameters/CartItemId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCartItemQuantityRequest'
+            example:
+              quantity: 3
+      responses:
+        '204':
+          description: Cart item quantity updated successfully
+        '400':
+          $ref: '#/components/responses/InvalidQuantity'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '404':
+          $ref: '#/components/responses/CartItemNotFound'
+        '409':
+          $ref: '#/components/responses/CartConflict'
+
+  /api/v1/cart/items/{itemId}/selection:
+    patch:
+      tags:
+        - Cart
+      summary: Change cart item selection
+      description: Selects or unselects an item for the authenticated buyer's next order.
+      operationId: updateCartItemSelection
+      parameters:
+        - $ref: '#/components/parameters/CartItemId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCartItemSelectionRequest'
+            example:
+              selected: true
+      responses:
+        '204':
+          description: Cart item selection updated successfully
+        '400':
+          $ref: '#/components/responses/InvalidCartItemId'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '404':
+          $ref: '#/components/responses/CartItemNotFound'
+
+  /api/v1/cart/items/{itemId}:
+    delete:
+      tags:
+        - Cart
+      summary: Remove an item from the cart
+      description: Removes an item owned by the authenticated buyer from the cart.
+      operationId: removeCartItem
+      parameters:
+        - $ref: '#/components/parameters/CartItemId'
+      responses:
+        '204':
+          description: Cart item removed successfully
+        '400':
+          $ref: '#/components/responses/InvalidCartItemId'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '404':
+          $ref: '#/components/responses/CartItemNotFound'
+
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: JSESSIONID
+      description: HTTP session cookie issued after successful authentication
+
+  parameters:
+    CartItemId:
+      name: itemId
+      in: path
+      required: true
+      description: Unique cart item identifier
+      schema:
+        type: integer
+        format: int64
+        minimum: 1
+      example: 25
+
+  schemas:
+    CartItem:
+      type: object
+      description: Item stored in the authenticated buyer's cart
+      required:
+        - id
+        - productId
+        - productName
+        - price
+        - quantity
+        - selected
+        - subtotal
+      properties:
+        id:
+          type: integer
+          format: int64
+          minimum: 1
+          description: Unique cart item identifier
+          example: 25
+        productId:
+          type: integer
+          format: int64
+          minimum: 1
+          description: Product identifier
+          example: 10
+        productName:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: Product name displayed in the cart
+          example: Mechanical Keyboard
+        price:
+          type: number
+          minimum: 0
+          exclusiveMinimum: true
+          multipleOf: 0.01
+          description: Price of one product unit
+          example: 7490.00
+        quantity:
+          type: integer
+          format: int32
+          minimum: 1
+          description: Number of product units in the cart
+          example: 2
+        selected:
+          type: boolean
+          description: Whether the item is selected for the next order
+          example: true
+        imageUrl:
+          type: string
+          format: uri
+          maxLength: 1000
+          nullable: true
+          description: URL of the product image
+          example: https://example.com/images/keyboard.jpg
+        subtotal:
+          type: number
+          minimum: 0
+          exclusiveMinimum: true
+          multipleOf: 0.01
+          description: Product price multiplied by quantity
+          example: 14980.00
+
+    AddCartItemRequest:
+      type: object
+      required:
+        - productId
+      properties:
+        productId:
+          type: integer
+          format: int64
+          minimum: 1
+          description: Identifier of the product to add
+          example: 10
+
+    UpdateCartItemQuantityRequest:
+      type: object
+      required:
+        - quantity
+      properties:
+        quantity:
+          type: integer
+          format: int32
+          minimum: 1
+          description: New cart item quantity
+          example: 3
+
+    UpdateCartItemSelectionRequest:
+      type: object
+      required:
+        - selected
+      properties:
+        selected:
+          type: boolean
+          description: New selection state
+          example: true
+
+    ApiError:
+      type: object
+      description: Stable error response returned by the REST API
+      required:
+        - timestamp
+        - status
+        - code
+        - message
+        - path
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: Time when the error occurred
+          example: '2026-08-30T12:00:00Z'
+        status:
+          type: integer
+          format: int32
+          description: HTTP response status
+          example: 400
+        code:
+          type: string
+          description: Stable machine-readable application error code
+          example: INVALID_QUANTITY
+        message:
+          type: string
+          description: Human-readable error description
+          example: Quantity must be greater than or equal to 1
+        path:
+          type: string
+          description: Request path that produced the error
+          example: /api/v1/cart/items/25/quantity
+        validationErrors:
+          type: array
+          description: Field-level errors for an invalid request
+          items:
+            $ref: '#/components/schemas/ValidationError'
+        traceId:
+          type: string
+          nullable: true
+          description: Request trace identifier used for diagnostics
+          example: 7f5c8f2d3a9b4e11
+
+    ValidationError:
+      type: object
+      required:
+        - field
+        - message
+      properties:
+        field:
+          type: string
+          description: Invalid field or parameter name
+          example: quantity
+        message:
+          type: string
+          description: Validation error description
+          example: must be greater than or equal to 1
+
+  responses:
+    InvalidProductId:
+      description: Product ID has an invalid format or value
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          example:
+            timestamp: '2026-08-30T12:00:00Z'
+            status: 400
+            code: INVALID_PRODUCT_ID
+            message: Product ID must be a positive integer
+            path: /api/v1/cart/items
+            validationErrors:
+              - field: productId
+                message: must be greater than or equal to 1
+
+    InvalidCartItemId:
+      description: Cart item ID has an invalid format or value
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          example:
+            timestamp: '2026-08-30T12:00:00Z'
+            status: 400
+            code: INVALID_CART_ITEM_ID
+            message: Cart item ID must be a positive integer
+            path: /api/v1/cart/items/0
+            validationErrors:
+              - field: itemId
+                message: must be greater than or equal to 1
+
+    InvalidQuantity:
+      description: Cart item ID or requested quantity has an invalid value
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          examples:
+            invalidQuantity:
+              summary: Quantity is not positive
+              value:
+                timestamp: '2026-08-30T12:00:00Z'
+                status: 400
+                code: INVALID_QUANTITY
+                message: Quantity must be greater than or equal to 1
+                path: /api/v1/cart/items/25/quantity
+                validationErrors:
+                  - field: quantity
+                    message: must be greater than or equal to 1
+            invalidItemId:
+              summary: Cart item ID is not positive
+              value:
+                timestamp: '2026-08-30T12:00:00Z'
+                status: 400
+                code: INVALID_CART_ITEM_ID
+                message: Cart item ID must be a positive integer
+                path: /api/v1/cart/items/0/quantity
+                validationErrors:
+                  - field: itemId
+                    message: must be greater than or equal to 1
+
+    AuthenticationRequired:
+      description: Authentication is required to access the shopping cart
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          example:
+            timestamp: '2026-08-30T12:00:00Z'
+            status: 401
+            code: AUTHENTICATION_REQUIRED
+            message: Authentication is required
+            path: /api/v1/cart/items
+
+    ProductNotFound:
+      description: Product with the requested ID does not exist
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          example:
+            timestamp: '2026-08-30T12:00:00Z'
+            status: 404
+            code: PRODUCT_NOT_FOUND
+            message: Product was not found
+            path: /api/v1/cart/items
+
+    CartItemNotFound:
+      description: Cart item does not exist or does not belong to the authenticated buyer
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          example:
+            timestamp: '2026-08-30T12:00:00Z'
+            status: 404
+            code: CART_ITEM_NOT_FOUND
+            message: Cart item was not found
+            path: /api/v1/cart/items/25
+
+    CartConflict:
+      description: Product cannot be added or updated in the requested quantity
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+          examples:
+            productUnavailable:
+              summary: Product is inactive or out of stock
+              value:
+                timestamp: '2026-08-30T12:00:00Z'
+                status: 409
+                code: PRODUCT_UNAVAILABLE
+                message: Product is currently unavailable
+                path: /api/v1/cart/items
+            insufficientStock:
+              summary: Requested quantity exceeds available stock
+              value:
+                timestamp: '2026-08-30T12:00:00Z'
+                status: 409
+                code: INSUFFICIENT_STOCK
+                message: Insufficient product stock
+                path: /api/v1/cart/items/25/quantity
