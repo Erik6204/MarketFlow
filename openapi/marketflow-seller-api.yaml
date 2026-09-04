@@ -1,0 +1,241 @@
+openapi: 3.0.3
+
+info:
+  title: MarketFlow Seller Products API
+  version: 0.1.0
+  description: Product management operations for the authenticated seller.
+
+servers:
+  - url: http://localhost:8080
+
+tags:
+  - name: Seller Products
+
+security:
+  - sessionCookie: []
+
+paths:
+  /api/v1/seller/products:
+    get:
+      tags: [Seller Products]
+      summary: List products owned by the authenticated seller
+      operationId: getSellerProducts
+      responses:
+        '200':
+          description: Seller products returned successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/SellerProduct' }
+        '401': { $ref: '#/components/responses/AuthenticationRequired' }
+        '403': { $ref: '#/components/responses/SellerAccessDenied' }
+    post:
+      tags: [Seller Products]
+      summary: Create a product
+      operationId: createProduct
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateProductRequest' }
+      responses:
+        '201':
+          description: Product created successfully
+          headers:
+            Location:
+              schema: { type: string, format: uri-reference }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CreatedProduct' }
+        '400': { $ref: '#/components/responses/ValidationErrorResponse' }
+        '401': { $ref: '#/components/responses/AuthenticationRequired' }
+        '403': { $ref: '#/components/responses/SellerAccessDenied' }
+
+  /api/v1/seller/products/{productId}:
+    get:
+      tags: [Seller Products]
+      summary: Get a product owned by the authenticated seller
+      operationId: getSellerProduct
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+      responses:
+        '200':
+          description: Seller product returned successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SellerProduct' }
+        '400': { $ref: '#/components/responses/InvalidProductId' }
+        '401': { $ref: '#/components/responses/AuthenticationRequired' }
+        '403': { $ref: '#/components/responses/SellerAccessDenied' }
+        '404': { $ref: '#/components/responses/ProductNotFound' }
+    patch:
+      tags: [Seller Products]
+      summary: Partially update a product
+      operationId: updateProduct
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateProductRequest' }
+      responses:
+        '204': { description: Product updated successfully }
+        '400': { $ref: '#/components/responses/ValidationErrorResponse' }
+        '401': { $ref: '#/components/responses/AuthenticationRequired' }
+        '403': { $ref: '#/components/responses/SellerAccessDenied' }
+        '404': { $ref: '#/components/responses/ProductNotFound' }
+
+  /api/v1/seller/products/{productId}/availability:
+    patch:
+      tags: [Seller Products]
+      summary: Enable or disable a product
+      operationId: updateProductAvailability
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateAvailabilityRequest' }
+      responses:
+        '204': { description: Product availability updated successfully }
+        '400': { $ref: '#/components/responses/ValidationErrorResponse' }
+        '401': { $ref: '#/components/responses/AuthenticationRequired' }
+        '403': { $ref: '#/components/responses/SellerAccessDenied' }
+        '404': { $ref: '#/components/responses/ProductNotFound' }
+        '409': { $ref: '#/components/responses/ProductUnavailable' }
+
+  /api/v1/seller/products/{productId}/restock:
+    post:
+      tags: [Seller Products]
+      summary: Increase product stock
+      operationId: restockProduct
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RestockProductRequest' }
+      responses:
+        '204': { description: Product stock increased successfully }
+        '400': { $ref: '#/components/responses/ValidationErrorResponse' }
+        '401': { $ref: '#/components/responses/AuthenticationRequired' }
+        '403': { $ref: '#/components/responses/SellerAccessDenied' }
+        '404': { $ref: '#/components/responses/ProductNotFound' }
+
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: JSESSIONID
+
+  parameters:
+    ProductId:
+      name: productId
+      in: path
+      required: true
+      schema: { type: integer, format: int64, minimum: 1 }
+
+  schemas:
+    CreateProductRequest:
+      type: object
+      required: [name, price, quantity]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 200 }
+        description: { type: string, nullable: true }
+        price: { type: number, minimum: 0, exclusiveMinimum: true, multipleOf: 0.01 }
+        quantity: { type: integer, format: int32, minimum: 0 }
+        imageUrl: { type: string, format: uri, nullable: true, maxLength: 1000 }
+
+    UpdateProductRequest:
+      type: object
+      properties:
+        name: { type: string, minLength: 1, maxLength: 200 }
+        description: { type: string, nullable: true }
+        price: { type: number, minimum: 0, exclusiveMinimum: true, multipleOf: 0.01 }
+        imageUrl: { type: string, format: uri, nullable: true, maxLength: 1000 }
+
+    UpdateAvailabilityRequest:
+      type: object
+      required: [active]
+      properties:
+        active: { type: boolean }
+
+    RestockProductRequest:
+      type: object
+      required: [amount]
+      properties:
+        amount: { type: integer, format: int32, minimum: 1 }
+
+    CreatedProduct:
+      type: object
+      required: [productId]
+      properties:
+        productId: { type: integer, format: int64, minimum: 1 }
+
+    SellerProduct:
+      type: object
+      required: [id, name, price, quantity, costPrice, active]
+      properties:
+        id: { type: integer, format: int64, minimum: 1 }
+        name: { type: string, minLength: 1, maxLength: 200 }
+        description: { type: string, nullable: true }
+        price: { type: number, minimum: 0, exclusiveMinimum: true, multipleOf: 0.01 }
+        quantity: { type: integer, format: int32, minimum: 0 }
+        imageUrl: { type: string, format: uri, nullable: true, maxLength: 1000 }
+        costPrice: { type: number, minimum: 0, multipleOf: 0.01 }
+        active: { type: boolean }
+
+    ApiError:
+      type: object
+      required: [timestamp, status, code, message, path, validationErrors]
+      properties:
+        timestamp: { type: string, format: date-time }
+        status: { type: integer, format: int32 }
+        code: { type: string }
+        message: { type: string }
+        path: { type: string }
+        validationErrors: { type: array, items: { $ref: '#/components/schemas/ValidationError' } }
+        traceId: { type: string, nullable: true }
+    ValidationError:
+      type: object
+      required: [field, message]
+      properties:
+        field: { type: string }
+        message: { type: string }
+
+  responses:
+    ValidationErrorResponse:
+      description: Path parameter, request body, or quantity is invalid
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiError' }
+    InvalidProductId:
+      description: Product ID has an invalid value or format
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiError' }
+    AuthenticationRequired:
+      description: Authentication is required
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiError' }
+    SellerAccessDenied:
+      description: The authenticated user is not a seller
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiError' }
+    ProductNotFound:
+      description: Product does not exist or belongs to another seller
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiError' }
+    ProductUnavailable:
+      description: Product cannot be enabled while it has no stock
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiError' }

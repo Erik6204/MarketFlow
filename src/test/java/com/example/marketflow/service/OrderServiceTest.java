@@ -26,6 +26,7 @@ import com.example.marketflow.Repository.OrderRepository;
 import com.example.marketflow.Repository.ProductRepository;
 import com.example.marketflow.cart.CartItemEntity;
 import com.example.marketflow.exception.InsufficientStockException;
+import com.example.marketflow.exception.NoSelectedCartItemsException;
 import com.example.marketflow.products.ProductEntity;
 
 @ExtendWith(MockitoExtension.class)
@@ -111,5 +112,19 @@ class OrderServiceTest {
 
         verifyNoInteractions(orderRepository, orderItemRepository);
         verify(cartItemRepository, never()).deleteSelectedByBuyerId(buyerId);
+    }
+
+    @Test
+    void createOrderRejectsEmptySelectionBeforeAnyWrite() {
+        when(cartItemRepository.findAllByBuyerIdAndSelectedTrue(7L))
+                .thenReturn(List.of());
+
+        assertThrows(
+                NoSelectedCartItemsException.class,
+                () -> orderService.createOrder(7L)
+        );
+
+        verifyNoInteractions(productRepository, orderRepository, orderItemRepository);
+        verify(cartItemRepository, never()).deleteSelectedByBuyerId(7L);
     }
 }

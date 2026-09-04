@@ -54,7 +54,9 @@ public class CheckoutService {
                 throw new ProductNotFoundException(item.getProductId());
             }
 
-            if (!Boolean.TRUE.equals(product.getActive())) {
+            if (!Boolean.TRUE.equals(product.getActive())
+                    || product.getQuantity() == null
+                    || product.getQuantity() <= 0) {
                 throw new ProductUnavailableException();
             }
 

@@ -1,4 +1,4 @@
-package com.example.marketflow.controller;
+package com.example.marketflow.MVCTHymeleafcontroller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

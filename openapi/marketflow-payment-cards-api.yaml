@@ -1,0 +1,115 @@
+openapi: 3.0.3
+
+info:
+  title: MarketFlow Payment Cards API
+  version: 0.1.0
+  description: Safe payment-card views and card creation for the authenticated buyer.
+
+servers:
+  - url: http://localhost:8080
+
+tags:
+  - name: Payment Cards
+
+security:
+  - sessionCookie: []
+
+paths:
+  /api/v1/payment-cards:
+    get:
+      tags: [Payment Cards]
+      summary: List the authenticated buyer's cards
+      operationId: getPaymentCards
+      responses:
+        '200':
+          description: Cards returned without card tokens
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/PaymentCard' }
+        '401': { $ref: '#/components/responses/AuthenticationRequired' }
+    post:
+      tags: [Payment Cards]
+      summary: Add a payment card
+      operationId: addPaymentCard
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AddPaymentCardRequest' }
+      responses:
+        '201':
+          description: Card added successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PaymentCard' }
+        '400': { $ref: '#/components/responses/ValidationErrorResponse' }
+        '401': { $ref: '#/components/responses/AuthenticationRequired' }
+
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: JSESSIONID
+
+  schemas:
+    AddPaymentCardRequest:
+      type: object
+      required: [cardtoken, maskedNumber, balance]
+      properties:
+        cardtoken:
+          type: string
+          minLength: 1
+          maxLength: 100
+          writeOnly: true
+          description: Token supplied by the payment provider; raw card data is not accepted
+        maskedNumber:
+          type: string
+          minLength: 1
+          maxLength: 30
+          example: '**** **** **** 4242'
+        balance:
+          type: number
+          minimum: 0
+          multipleOf: 0.01
+
+    PaymentCard:
+      type: object
+      required: [id, maskedNumber, balance, active]
+      properties:
+        id: { type: integer, format: int64, minimum: 1 }
+        maskedNumber: { type: string, minLength: 1, maxLength: 30 }
+        balance: { type: number, minimum: 0, multipleOf: 0.01 }
+        active: { type: boolean }
+
+    ApiError:
+      type: object
+      required: [timestamp, status, code, message, path, validationErrors]
+      properties:
+        timestamp: { type: string, format: date-time }
+        status: { type: integer, format: int32 }
+        code: { type: string }
+        message: { type: string }
+        path: { type: string }
+        validationErrors: { type: array, items: { $ref: '#/components/schemas/ValidationError' } }
+        traceId: { type: string, nullable: true }
+    ValidationError:
+      type: object
+      required: [field, message]
+      properties:
+        field: { type: string }
+        message: { type: string }
+
+  responses:
+    ValidationErrorResponse:
+      description: Card request is invalid or malformed
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiError' }
+    AuthenticationRequired:
+      description: Authentication is required
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiError' }

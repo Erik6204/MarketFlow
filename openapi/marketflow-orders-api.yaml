@@ -1,0 +1,159 @@
+openapi: 3.0.3
+
+info:
+  title: MarketFlow Orders API
+  version: 0.1.0
+  description: Order creation and order details for the authenticated buyer.
+
+servers:
+  - url: http://localhost:8080
+
+tags:
+  - name: Orders
+
+security:
+  - sessionCookie: []
+
+paths:
+  /api/v1/orders:
+    post:
+      tags: [Orders]
+      summary: Create an order from selected cart items
+      operationId: createOrder
+      responses:
+        '201':
+          description: Order created successfully
+          headers:
+            Location:
+              schema: { type: string, format: uri-reference }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CreatedOrder' }
+        '400':
+          $ref: '#/components/responses/InvalidOrderRequest'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '404':
+          $ref: '#/components/responses/ProductNotFound'
+        '409':
+          $ref: '#/components/responses/OrderCreationConflict'
+
+  /api/v1/orders/{orderId}:
+    get:
+      tags: [Orders]
+      summary: Get an order belonging to the authenticated buyer
+      operationId: getOrder
+      parameters:
+        - $ref: '#/components/parameters/OrderId'
+      responses:
+        '200':
+          description: Order returned successfully
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/OrderDetails' }
+        '400':
+          $ref: '#/components/responses/InvalidOrderId'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '404':
+          $ref: '#/components/responses/OrderNotFound'
+
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: JSESSIONID
+
+  parameters:
+    OrderId:
+      name: orderId
+      in: path
+      required: true
+      schema: { type: integer, format: int64, minimum: 1 }
+
+  schemas:
+    CreatedOrder:
+      type: object
+      required: [orderId]
+      properties:
+        orderId: { type: integer, format: int64, minimum: 1 }
+
+    OrderDetails:
+      type: object
+      required: [id, status, paymentStatus, totalPrice, createdAt, items]
+      properties:
+        id: { type: integer, format: int64, minimum: 1 }
+        status:
+          type: string
+          enum: [CREATED, CONFIRMED, PROCESSING, COMPLETED, CANCELLED]
+        paymentStatus:
+          type: string
+          enum: [NOT_PAID, PROCESSING, PAID, FAILED, REFUNDED]
+        totalPrice: { type: number, minimum: 0, exclusiveMinimum: true, multipleOf: 0.01 }
+        createdAt: { type: string, format: date-time }
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/OrderItem' }
+
+    OrderItem:
+      type: object
+      required: [productId, sellerId, productName, unitPrice, quantity, totalPrice]
+      properties:
+        productId: { type: integer, format: int64, minimum: 1 }
+        sellerId: { type: integer, format: int64, minimum: 1 }
+        productName: { type: string, minLength: 1, maxLength: 200 }
+        unitPrice: { type: number, minimum: 0, exclusiveMinimum: true, multipleOf: 0.01 }
+        quantity: { type: integer, format: int32, minimum: 1 }
+        totalPrice: { type: number, minimum: 0, exclusiveMinimum: true, multipleOf: 0.01 }
+        imageUrl: { type: string, format: uri, nullable: true, maxLength: 1000 }
+
+    ApiError:
+      type: object
+      required: [timestamp, status, code, message, path, validationErrors]
+      properties:
+        timestamp: { type: string, format: date-time }
+        status: { type: integer, format: int32 }
+        code: { type: string }
+        message: { type: string }
+        path: { type: string }
+        validationErrors: { type: array, items: { $ref: '#/components/schemas/ValidationError' } }
+        traceId: { type: string, nullable: true }
+    ValidationError:
+      type: object
+      required: [field, message]
+      properties:
+        field: { type: string }
+        message: { type: string }
+
+  responses:
+    InvalidOrderRequest:
+      description: Stored cart quantity is invalid
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiError' }
+    InvalidOrderId:
+      description: Order ID has an invalid value or format
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiError' }
+    AuthenticationRequired:
+      description: Authentication is required
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiError' }
+    OrderNotFound:
+      description: Order does not exist or does not belong to this buyer
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiError' }
+    ProductNotFound:
+      description: A selected product no longer exists
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiError' }
+    OrderCreationConflict:
+      description: Selected items are missing, unavailable, or have insufficient stock
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiError' }

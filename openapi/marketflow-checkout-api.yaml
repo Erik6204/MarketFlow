@@ -1,0 +1,90 @@
+openapi: 3.0.3
+
+info:
+  title: MarketFlow Checkout API
+  version: 0.1.0
+  description: Checkout preview for selected cart items of the authenticated buyer.
+
+servers:
+  - url: http://localhost:8080
+
+tags:
+  - name: Checkout
+
+security:
+  - sessionCookie: []
+
+paths:
+  /api/v1/checkout:
+    get:
+      tags: [Checkout]
+      summary: Calculate the selected cart total
+      operationId: getCheckout
+      responses:
+        '200':
+          description: Checkout summary returned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckoutSummary'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '404':
+          $ref: '#/components/responses/ProductNotFound'
+        '409':
+          $ref: '#/components/responses/CheckoutConflict'
+
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: JSESSIONID
+
+  schemas:
+    CheckoutSummary:
+      type: object
+      required: [total]
+      properties:
+        total:
+          type: number
+          format: decimal
+          minimum: 0
+          exclusiveMinimum: true
+          multipleOf: 0.01
+          example: 14980.00
+
+    ApiError:
+      type: object
+      required: [timestamp, status, code, message, path, validationErrors]
+      properties:
+        timestamp: { type: string, format: date-time }
+        status: { type: integer, format: int32 }
+        code: { type: string }
+        message: { type: string }
+        path: { type: string }
+        validationErrors: { type: array, items: { $ref: '#/components/schemas/ValidationError' } }
+        traceId: { type: string, nullable: true }
+    ValidationError:
+      type: object
+      required: [field, message]
+      properties:
+        field: { type: string }
+        message: { type: string }
+
+  responses:
+    AuthenticationRequired:
+      description: Authentication is required
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiError' }
+    ProductNotFound:
+      description: A selected product no longer exists
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiError' }
+    CheckoutConflict:
+      description: No items are selected, a product is unavailable, or stock is insufficient
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiError' }

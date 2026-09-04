@@ -7,6 +7,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -195,13 +196,19 @@ public class GlobalRestExceptionHandler {
             HttpServletRequest request
     ) {
         String field = exception.getName();
-        boolean itemIdError = "itemId".equals(field);
-        String code = itemIdError
-                ? "INVALID_CART_ITEM_ID"
-                : "INVALID_PRODUCT_ID";
-        String message = itemIdError
-                ? "Cart item ID must be a positive integer"
-                : "Product ID must be a positive integer";
+        String code;
+        String message;
+
+        if ("itemId".equals(field)) {
+            code = "INVALID_CART_ITEM_ID";
+            message = "Cart item ID must be a positive integer";
+        } else if ("orderId".equals(field)) {
+            code = "INVALID_ORDER_ID";
+            message = "Order ID must be a positive integer";
+        } else {
+            code = "INVALID_PRODUCT_ID";
+            message = "Product ID must be a positive integer";
+        }
 
         ApiError error = new ApiError(
                 Instant.now(),
@@ -240,7 +247,7 @@ public class GlobalRestExceptionHandler {
         if ("productId".equals(field)) {
             code = "INVALID_PRODUCT_ID";
             message = "Product ID must be a positive integer";
-        } else if ("quantity".equals(field)) {
+        } else if ("quantity".equals(field) || "amount".equals(field)) {
             code = "INVALID_QUANTITY";
             message = "Quantity must be greater than or equal to 1";
         } else if ("selected".equals(field)) {
@@ -264,6 +271,246 @@ public class GlobalRestExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(error);
+    }
+
+    @ExceptionHandler(EmailAlreadyExistsException.class)
+    public ResponseEntity<ApiError> handleEmailAlreadyExists(
+            EmailAlreadyExistsException exception,
+            HttpServletRequest request
+    ) {
+        ApiError error = new ApiError(
+                Instant.now(),
+                HttpStatus.CONFLICT.value(),
+                "EMAIL_ALREADY_EXISTS",
+                exception.getMessage(),
+                request.getRequestURI(),
+                List.of(),
+                null
+        );
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<ApiError> handleInvalidCredentials(
+            InvalidCredentialsException exception,
+            HttpServletRequest request
+    ) {
+        ApiError error = new ApiError(
+                Instant.now(),
+                HttpStatus.UNAUTHORIZED.value(),
+                "INVALID_CREDENTIALS",
+                exception.getMessage(),
+                request.getRequestURI(),
+                List.of(),
+                null
+        );
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ApiError> handleUserNotFound(
+            UserNotFoundException exception,
+            HttpServletRequest request
+    ) {
+        ApiError error = new ApiError(
+                Instant.now(),
+                HttpStatus.NOT_FOUND.value(),
+                "USER_NOT_FOUND",
+                exception.getMessage(),
+                request.getRequestURI(),
+                List.of(),
+                null
+        );
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(SellerAccessDeniedException.class)
+    public ResponseEntity<ApiError> handleSellerAccessDenied(
+            SellerAccessDeniedException exception,
+            HttpServletRequest request
+    ) {
+        ApiError error = new ApiError(
+                Instant.now(),
+                HttpStatus.FORBIDDEN.value(),
+                "SELLER_ACCESS_DENIED",
+                exception.getMessage(),
+                request.getRequestURI(),
+                List.of(),
+                null
+        );
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+    }
+
+    @ExceptionHandler(NoSelectedCartItemsException.class)
+    public ResponseEntity<ApiError> handleNoSelectedCartItems(
+            NoSelectedCartItemsException exception,
+            HttpServletRequest request
+    ) {
+        ApiError error = new ApiError(
+                Instant.now(),
+                HttpStatus.CONFLICT.value(),
+                "NO_SELECTED_CART_ITEMS",
+                exception.getMessage(),
+                request.getRequestURI(),
+                List.of(),
+                null
+        );
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+    @ExceptionHandler(InvalidOrderIdException.class)
+    public ResponseEntity<ApiError> handleInvalidOrderId(
+            InvalidOrderIdException exception,
+            HttpServletRequest request
+    ) {
+        ApiError error = new ApiError(
+                Instant.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                "INVALID_ORDER_ID",
+                exception.getMessage(),
+                request.getRequestURI(),
+                List.of(new ValidationError(
+                        "orderId",
+                        "must be greater than or equal to 1"
+                )),
+                null
+        );
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    @ExceptionHandler(OrderNotFoundException.class)
+    public ResponseEntity<ApiError> handleOrderNotFound(
+            OrderNotFoundException exception,
+            HttpServletRequest request
+    ) {
+        ApiError error = new ApiError(
+                Instant.now(),
+                HttpStatus.NOT_FOUND.value(),
+                "ORDER_NOT_FOUND",
+                exception.getMessage(),
+                request.getRequestURI(),
+                List.of(),
+                null
+        );
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(NotEnoughProductQuantityException.class)
+    public ResponseEntity<ApiError> handleNotEnoughProductQuantity(
+            NotEnoughProductQuantityException exception,
+            HttpServletRequest request
+    ) {
+        ApiError error = new ApiError(
+                Instant.now(),
+                HttpStatus.CONFLICT.value(),
+                "INSUFFICIENT_STOCK",
+                exception.getMessage(),
+                request.getRequestURI(),
+                List.of(),
+                null
+        );
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+    @ExceptionHandler(PaymentCardNotFoundException.class)
+    public ResponseEntity<ApiError> handlePaymentCardNotFound(
+            PaymentCardNotFoundException exception,
+            HttpServletRequest request
+    ) {
+        ApiError error = new ApiError(
+                Instant.now(),
+                HttpStatus.NOT_FOUND.value(),
+                "PAYMENT_CARD_NOT_FOUND",
+                exception.getMessage(),
+                request.getRequestURI(),
+                List.of(),
+                null
+        );
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(InsufficientFundsException.class)
+    public ResponseEntity<ApiError> handleInsufficientFunds(
+            InsufficientFundsException exception,
+            HttpServletRequest request
+    ) {
+        ApiError error = new ApiError(
+                Instant.now(),
+                HttpStatus.CONFLICT.value(),
+                "INSUFFICIENT_FUNDS",
+                exception.getMessage(),
+                request.getRequestURI(),
+                List.of(),
+                null
+        );
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+    @ExceptionHandler(PaymentAlreadyProcessedException.class)
+    public ResponseEntity<ApiError> handlePaymentAlreadyProcessed(
+            PaymentAlreadyProcessedException exception,
+            HttpServletRequest request
+    ) {
+        ApiError error = new ApiError(
+                Instant.now(),
+                HttpStatus.CONFLICT.value(),
+                "PAYMENT_ALREADY_PROCESSED",
+                exception.getMessage(),
+                request.getRequestURI(),
+                List.of(),
+                null
+        );
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+    @ExceptionHandler({
+            WalletAccountNotFoundException.class,
+            OwnerWalletAccountNotFoundException.class
+    })
+    public ResponseEntity<ApiError> handlePaymentProcessingFailure(
+            RuntimeException exception,
+            HttpServletRequest request
+    ) {
+        ApiError error = new ApiError(
+                Instant.now(),
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "PAYMENT_PROCESSING_FAILED",
+                "Payment could not be processed",
+                request.getRequestURI(),
+                List.of(),
+                null
+        );
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiError> handleHttpMessageNotReadable(
+            HttpMessageNotReadableException exception,
+            HttpServletRequest request
+    ) {
+        ApiError error = new ApiError(
+                Instant.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                "MALFORMED_REQUEST",
+                "Request body contains invalid JSON or unsupported values",
+                request.getRequestURI(),
+                List.of(),
+                null
+        );
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
 }
