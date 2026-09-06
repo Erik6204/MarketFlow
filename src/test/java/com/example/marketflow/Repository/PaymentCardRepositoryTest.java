@@ -73,6 +73,25 @@ class PaymentCardRepositoryTest {
         );
     }
 
+    @Test
+    void shouldReturnRefundToCardOwnerEvenWhenCardIsInactive() {
+        PaymentCardEntity card = card(7L, "60.00");
+        card.setActive(false);
+        card = paymentCardRepository.saveAndFlush(card);
+
+        int updatedRows = paymentCardRepository.increaseBalance(
+                card.getId(),
+                7L,
+                new BigDecimal("40.00")
+        );
+        entityManager.flush();
+        entityManager.clear();
+
+        PaymentCardEntity updated = paymentCardRepository.findById(card.getId()).orElseThrow();
+        assertEquals(1, updatedRows);
+        assertEquals(0, new BigDecimal("100.00").compareTo(updated.getBalance()));
+    }
+
     private PaymentCardEntity card(Long userId, String balance) {
         return new PaymentCardEntity(
                 userId,

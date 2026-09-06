@@ -60,4 +60,15 @@ public class RestOrderController {
         Long buyerId = requireBuyerId(session);
         return ResponseEntity.ok(orderService.getOrderDetails(orderId, buyerId));
     }
+
+    @PostMapping("/{orderId}/cancel")
+    public ResponseEntity<Void> cancelOrder(
+            @PathVariable Long orderId,
+            HttpSession session
+    ) {
+        validateOrderId(orderId);
+        Long buyerId = requireBuyerId(session);
+        orderService.cancelOrder(orderId, buyerId);
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -121,6 +121,16 @@ class RestOrderControllerTest {
                 .andExpect(jsonPath("$.code").value("ORDER_NOT_FOUND"));
     }
 
+    @Test
+    void cancelOrderReturns204AndCallsServiceForAuthenticatedBuyer()
+            throws Exception {
+        mockMvc.perform(post("/api/v1/orders/{orderId}/cancel", 42L)
+                        .session(authenticatedSession()))
+                .andExpect(status().isNoContent());
+
+        verify(orderService).cancelOrder(42L, BUYER_ID);
+    }
+
     private MockHttpSession authenticatedSession() {
         MockHttpSession session = new MockHttpSession();
         session.setAttribute("userId", BUYER_ID);

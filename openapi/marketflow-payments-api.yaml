@@ -149,7 +149,7 @@ components:
         application/json:
           schema: { $ref: '#/components/schemas/ApiError' }
     PaymentConflict:
-      description: Funds are insufficient or payment is already being processed
+      description: Funds are insufficient, payment was already processed, or the order status does not allow payment
       content:
         application/json:
           schema: { $ref: '#/components/schemas/ApiError' }

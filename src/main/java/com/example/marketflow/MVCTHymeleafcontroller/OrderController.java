@@ -54,4 +54,19 @@ public class OrderController {
 
         return "orders/showOrder";
     }
+
+    @PostMapping("/{orderId}/cancel")
+    public String cancelOrder(
+            @PathVariable Long orderId,
+            HttpSession session
+    ) {
+        Long buyerId = (Long) session.getAttribute("userId");
+
+        if (buyerId == null) {
+            return "redirect:/login";
+        }
+
+        orderService.cancelOrder(orderId, buyerId);
+        return "redirect:/account/orders/" + orderId;
+    }
 }

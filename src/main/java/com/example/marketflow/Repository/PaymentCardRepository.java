@@ -34,4 +34,17 @@ public interface PaymentCardRepository extends JpaRepository<PaymentCardEntity, 
             @Param("buyerId") Long buyerId,
             @Param("amount") BigDecimal amount
     );
+
+    @Modifying
+    @Query("""
+            UPDATE PaymentCardEntity card
+            SET card.balance = card.balance + :amount
+            WHERE card.id = :cardId
+            AND card.userid = :buyerId
+            """)
+    int increaseBalance(
+            @Param("cardId") Long cardId,
+            @Param("buyerId") Long buyerId,
+            @Param("amount") BigDecimal amount
+    );
 }

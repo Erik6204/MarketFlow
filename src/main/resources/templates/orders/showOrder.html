@@ -150,6 +150,14 @@
             Перейти к оплате
         </a>
 
+        <form th:if="${(order.status.name() == 'CREATED' and (order.paymentStatus.name() == 'NOT_PAID' or order.paymentStatus.name() == 'FAILED')) or (order.status.name() == 'CONFIRMED' and order.paymentStatus.name() == 'PAID')}"
+              th:action="@{/account/orders/{id}/cancel(id=${order.id})}"
+              method="post">
+            <button class="button button-secondary" type="submit">
+                Отменить заказ
+            </button>
+        </form>
+
         <p class="muted"
            th:if="${order.paymentStatus.name() == 'PAID'}">
             Заказ уже оплачен.

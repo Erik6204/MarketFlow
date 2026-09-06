@@ -20,9 +20,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.example.marketflow.Order.OrderEntity;
 import com.example.marketflow.Order.OrderItemEntity;
+import com.example.marketflow.Order.OrderStatus;
 import com.example.marketflow.Repository.OrderItemRepository;
 import com.example.marketflow.Repository.OrderRepository;
 import com.example.marketflow.Repository.PaymentCardRepository;
@@ -117,7 +119,9 @@ class PaymentServiceTest {
     @Test
     void payOrderStopsBeforePayoutsWhenCardBalanceIsInsufficient() {
         OrderEntity order = org.mockito.Mockito.mock(OrderEntity.class);
+        when(order.getId()).thenReturn(42L);
         when(order.getTotalPrice()).thenReturn(new BigDecimal("100.00"));
+        when(order.getStatus()).thenReturn(OrderStatus.CREATED);
         when(order.getPaymentStatus()).thenReturn(PaymentStatus.NOT_PAID);
         when(orderRepository.findForPayment(42L, 7L)).thenReturn(Optional.of(order));
         when(transactionRepository.findByIdempotencyKey("payment-key"))
@@ -140,8 +144,13 @@ class PaymentServiceTest {
         );
 
         verify(order).changePaymentStatus(PaymentStatus.PROCESSING);
+        verify(order).changePaymentStatus(PaymentStatus.FAILED);
         verify(order, never()).changePaymentStatus(PaymentStatus.PAID);
-        verify(transactionRepository, never()).save(any(PaymentTransactionEntity.class));
+        ArgumentCaptor<PaymentTransactionEntity> failedTransaction =
+                ArgumentCaptor.forClass(PaymentTransactionEntity.class);
+        verify(transactionRepository).save(failedTransaction.capture());
+        assertEquals(TransactionStatus.FAILED, failedTransaction.getValue().getStatus());
+        assertEquals(15L, failedTransaction.getValue().getPaymentCardId());
         verifyNoInteractions(orderItemRepository, walletAccountRepository);
     }
 
@@ -196,6 +205,7 @@ class PaymentServiceTest {
         verify(walletAccountRepository).increaseBalance(99L, new BigDecimal("10.00"));
         verify(order).changePaymentStatus(PaymentStatus.PROCESSING);
         verify(order).changePaymentStatus(PaymentStatus.PAID);
+        verify(order).changeStatus(OrderStatus.CONFIRMED);
 
         ArgumentCaptor<PaymentTransactionEntity> captor =
                 ArgumentCaptor.forClass(PaymentTransactionEntity.class);
@@ -214,12 +224,79 @@ class PaymentServiceTest {
                 .orElseThrow();
         assertEquals(99L, commission.getUserId());
         assertEquals(0, new BigDecimal("10.00").compareTo(commission.getAmount()));
+        PaymentTransactionEntity payment = transactions.stream()
+                .filter(item -> item.getType() == TransactionType.PAYMENT)
+                .findFirst()
+                .orElseThrow();
+        assertEquals(15L, payment.getPaymentCardId());
+    }
+
+    @Test
+    void refundOrderReversesPayoutsAndReturnsMoneyToBuyerCard() {
+        OrderEntity order = new OrderEntity(
+                7L,
+                OrderStatus.CREATED,
+                new BigDecimal("100.00")
+        );
+        ReflectionTestUtils.setField(order, "id", 42L);
+        order.changePaymentStatus(PaymentStatus.PROCESSING);
+        order.changePaymentStatus(PaymentStatus.PAID);
+        order.changeStatus(OrderStatus.CONFIRMED);
+
+        PaymentTransactionEntity payment = new PaymentTransactionEntity(
+                42L, 7L, TransactionType.PAYMENT,
+                new BigDecimal("100.00"), TransactionStatus.COMPLETED,
+                "payment-key", 15L
+        );
+        PaymentTransactionEntity sellerPayout = new PaymentTransactionEntity(
+                42L, 5L, TransactionType.SELLER_PAYOUT,
+                new BigDecimal("90.00"), TransactionStatus.COMPLETED,
+                "payment-key:seller:5"
+        );
+        PaymentTransactionEntity commission = new PaymentTransactionEntity(
+                42L, 99L, TransactionType.PLATFORM_COMMISSION,
+                new BigDecimal("10.00"), TransactionStatus.COMPLETED,
+                "payment-key:owner"
+        );
+
+        when(transactionRepository.findAllByOrderId(42L))
+                .thenReturn(List.of(payment, sellerPayout, commission));
+        when(walletAccountRepository.decreaseBalance(5L, new BigDecimal("90.00")))
+                .thenReturn(1);
+        when(walletAccountRepository.decreaseBalance(99L, new BigDecimal("10.00")))
+                .thenReturn(1);
+        when(paymentCardRepository.increaseBalance(15L, 7L, new BigDecimal("100.00")))
+                .thenReturn(1);
+
+        paymentService.refundOrder(order);
+
+        assertEquals(PaymentStatus.REFUNDED, order.getPaymentStatus());
+        assertEquals(TransactionStatus.REFUNDED, payment.getStatus());
+        assertEquals(TransactionStatus.REFUNDED, sellerPayout.getStatus());
+        assertEquals(TransactionStatus.REFUNDED, commission.getStatus());
+        verify(paymentCardRepository).increaseBalance(
+                15L, 7L, new BigDecimal("100.00")
+        );
+
+        ArgumentCaptor<PaymentTransactionEntity> reversalCaptor =
+                ArgumentCaptor.forClass(PaymentTransactionEntity.class);
+        verify(transactionRepository, times(3)).save(reversalCaptor.capture());
+        assertEquals(1, reversalCaptor.getAllValues().stream()
+                .filter(item -> item.getType() == TransactionType.REFUND)
+                .count());
+        assertEquals(1, reversalCaptor.getAllValues().stream()
+                .filter(item -> item.getType() == TransactionType.SELLER_PAYOUT_REVERSAL)
+                .count());
+        assertEquals(1, reversalCaptor.getAllValues().stream()
+                .filter(item -> item.getType() == TransactionType.PLATFORM_COMMISSION_REVERSAL)
+                .count());
     }
 
     private OrderEntity payableOrder() {
         OrderEntity order = org.mockito.Mockito.mock(OrderEntity.class);
         when(order.getId()).thenReturn(42L);
         when(order.getTotalPrice()).thenReturn(new BigDecimal("100.00"));
+        when(order.getStatus()).thenReturn(OrderStatus.CREATED);
         when(order.getPaymentStatus()).thenReturn(PaymentStatus.NOT_PAID);
         return order;
     }

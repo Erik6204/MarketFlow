@@ -27,7 +27,8 @@ class PaymentTransactionRepositoryTest {
                 TransactionType.PAYMENT,
                 new BigDecimal("1000.00"),
                 TransactionStatus.COMPLETED,
-                "payment-order-15"
+                "payment-order-15",
+                3L
         );
         paymentTransactionRepository.saveAndFlush(transaction);
 
@@ -38,6 +39,7 @@ class PaymentTransactionRepositoryTest {
                 .findByIdempotencyKey("payment-order-15")
                 .orElseThrow();
         assertEquals(15L, found.getOrderId());
+        assertEquals(3L, found.getPaymentCardId());
         assertEquals(TransactionStatus.COMPLETED, found.getStatus());
     }
 }

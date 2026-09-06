@@ -29,6 +29,19 @@ public interface WalletAccountRepository extends JpaRepository<WalletAccountEnti
             @Param("amount") BigDecimal amount
     );
 
+    @Modifying
+    @Query(value = """
+            UPDATE wallet_accounts
+            SET balance = balance - :amount,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE user_id = :userId
+            AND balance >= :amount
+            """, nativeQuery = true)
+    int decreaseBalance(
+            @Param("userId") Long userId,
+            @Param("amount") BigDecimal amount
+    );
+
     @Query(value = """
             SELECT wa.*
             FROM wallet_accounts wa

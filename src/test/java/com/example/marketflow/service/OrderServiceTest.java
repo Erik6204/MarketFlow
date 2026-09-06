@@ -20,6 +20,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.example.marketflow.Order.OrderEntity;
+import com.example.marketflow.Order.OrderItemEntity;
+import com.example.marketflow.Order.OrderStatus;
 import com.example.marketflow.Repository.CartItemRepository;
 import com.example.marketflow.Repository.OrderItemRepository;
 import com.example.marketflow.Repository.OrderRepository;
@@ -28,6 +30,7 @@ import com.example.marketflow.cart.CartItemEntity;
 import com.example.marketflow.exception.InsufficientStockException;
 import com.example.marketflow.exception.NoSelectedCartItemsException;
 import com.example.marketflow.products.ProductEntity;
+import com.example.marketflow.payment.PaymentStatus;
 
 @ExtendWith(MockitoExtension.class)
 class OrderServiceTest {
@@ -43,6 +46,9 @@ class OrderServiceTest {
 
     @Mock
     private OrderItemRepository orderItemRepository;
+
+    @Mock
+    private PaymentService paymentService;
 
     @InjectMocks
     private OrderService orderService;
@@ -126,5 +132,62 @@ class OrderServiceTest {
 
         verifyNoInteractions(productRepository, orderRepository, orderItemRepository);
         verify(cartItemRepository, never()).deleteSelectedByBuyerId(7L);
+    }
+
+    @Test
+    void cancelUnpaidOrderRestoresStockWithoutRefund() {
+        OrderEntity order = mock(OrderEntity.class);
+        OrderItemEntity orderItem = mock(OrderItemEntity.class);
+        when(order.getId()).thenReturn(42L);
+        when(order.getStatus()).thenReturn(OrderStatus.CREATED);
+        when(order.getPaymentStatus()).thenReturn(PaymentStatus.NOT_PAID);
+        when(orderRepository.findForPayment(42L, 7L))
+                .thenReturn(java.util.Optional.of(order));
+        when(orderItemRepository.findAllByOrderId(42L))
+                .thenReturn(List.of(orderItem));
+        when(orderItem.getProductId()).thenReturn(11L);
+        when(orderItem.getQuantity()).thenReturn(2);
+        when(productRepository.increaseStock(11L, 2)).thenReturn(1);
+
+        orderService.cancelOrder(42L, 7L);
+
+        verify(productRepository).increaseStock(11L, 2);
+        verify(order).changeStatus(OrderStatus.CANCELLED);
+        verifyNoInteractions(paymentService);
+    }
+
+    @Test
+    void cancelPaidOrderRefundsMoneyAndRestoresStock() {
+        OrderEntity order = mock(OrderEntity.class);
+        OrderItemEntity orderItem = mock(OrderItemEntity.class);
+        when(order.getId()).thenReturn(42L);
+        when(order.getStatus()).thenReturn(OrderStatus.CONFIRMED);
+        when(order.getPaymentStatus()).thenReturn(PaymentStatus.PAID);
+        when(orderRepository.findForPayment(42L, 7L))
+                .thenReturn(java.util.Optional.of(order));
+        when(orderItemRepository.findAllByOrderId(42L))
+                .thenReturn(List.of(orderItem));
+        when(orderItem.getProductId()).thenReturn(11L);
+        when(orderItem.getQuantity()).thenReturn(2);
+        when(productRepository.increaseStock(11L, 2)).thenReturn(1);
+
+        orderService.cancelOrder(42L, 7L);
+
+        verify(paymentService).refundOrder(order);
+        verify(productRepository).increaseStock(11L, 2);
+        verify(order).changeStatus(OrderStatus.CANCELLED);
+    }
+
+    @Test
+    void repeatedCancellationDoesNotRestoreStockTwice() {
+        OrderEntity order = mock(OrderEntity.class);
+        when(order.getStatus()).thenReturn(OrderStatus.CANCELLED);
+        when(orderRepository.findForPayment(42L, 7L))
+                .thenReturn(java.util.Optional.of(order));
+
+        orderService.cancelOrder(42L, 7L);
+
+        verifyNoInteractions(paymentService, productRepository, orderItemRepository);
+        verify(order, never()).changeStatus(any(OrderStatus.class));
     }
 }

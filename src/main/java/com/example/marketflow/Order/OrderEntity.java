@@ -7,6 +7,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import com.example.marketflow.payment.PaymentStatus;
+import com.example.marketflow.exception.InvalidOrderStateException;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -66,9 +67,58 @@ public class OrderEntity {
     }
 
     public void changeStatus(OrderStatus status) {
+        if (!isAllowedOrderTransition(this.status, status)) {
+            throw new InvalidOrderStateException(
+                    "Order status cannot change from " + this.status + " to " + status
+            );
+        }
         this.status = status;
     }
+
     public void changePaymentStatus(PaymentStatus paymentStatus) {
+        if (!isAllowedPaymentTransition(this.paymentStatus, paymentStatus)) {
+            throw new InvalidOrderStateException(
+                    "Payment status cannot change from "
+                            + this.paymentStatus
+                            + " to "
+                            + paymentStatus
+            );
+        }
         this.paymentStatus = paymentStatus;
+    }
+
+    private boolean isAllowedOrderTransition(
+            OrderStatus current,
+            OrderStatus next
+    ) {
+        if (current == null || next == null) {
+            return false;
+        }
+
+        return switch (current) {
+            case CREATED -> next == OrderStatus.CONFIRMED
+                    || next == OrderStatus.CANCELLED;
+            case CONFIRMED -> next == OrderStatus.PROCESSING
+                    || next == OrderStatus.CANCELLED;
+            case PROCESSING -> next == OrderStatus.COMPLETED;
+            case COMPLETED, CANCELLED -> false;
+        };
+    }
+
+    private boolean isAllowedPaymentTransition(
+            PaymentStatus current,
+            PaymentStatus next
+    ) {
+        if (current == null || next == null) {
+            return false;
+        }
+
+        return switch (current) {
+            case NOT_PAID, FAILED -> next == PaymentStatus.PROCESSING;
+            case PROCESSING -> next == PaymentStatus.PAID
+                    || next == PaymentStatus.FAILED;
+            case PAID -> next == PaymentStatus.REFUNDED;
+            case REFUNDED -> false;
+        };
     }
 }

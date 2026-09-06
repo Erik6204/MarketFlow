@@ -475,6 +475,51 @@ public class GlobalRestExceptionHandler {
     }
 
     @ExceptionHandler({
+            InvalidOrderStateException.class,
+            RefundNotAvailableException.class
+    })
+    public ResponseEntity<ApiError> handleInvalidOrderState(
+            RuntimeException exception,
+            HttpServletRequest request
+    ) {
+        String code = exception instanceof RefundNotAvailableException
+                ? "REFUND_NOT_AVAILABLE"
+                : "INVALID_ORDER_STATE";
+
+        ApiError error = new ApiError(
+                Instant.now(),
+                HttpStatus.CONFLICT.value(),
+                code,
+                exception.getMessage(),
+                request.getRequestURI(),
+                List.of(),
+                null
+        );
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+    @ExceptionHandler(OrderCancellationFailedException.class)
+    public ResponseEntity<ApiError> handleOrderCancellationFailed(
+            OrderCancellationFailedException exception,
+            HttpServletRequest request
+    ) {
+        ApiError error = new ApiError(
+                Instant.now(),
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "ORDER_CANCELLATION_FAILED",
+                "Order cancellation could not be completed",
+                request.getRequestURI(),
+                List.of(),
+                null
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(error);
+    }
+
+    @ExceptionHandler({
             WalletAccountNotFoundException.class,
             OwnerWalletAccountNotFoundException.class
     })

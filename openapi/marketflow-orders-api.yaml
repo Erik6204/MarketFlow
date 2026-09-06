@@ -58,6 +58,27 @@ paths:
         '404':
           $ref: '#/components/responses/OrderNotFound'
 
+  /api/v1/orders/{orderId}/cancel:
+    post:
+      tags: [Orders]
+      summary: Cancel an order and refund it when it has already been paid
+      operationId: cancelOrder
+      parameters:
+        - $ref: '#/components/parameters/OrderId'
+      responses:
+        '204':
+          description: Order cancelled successfully
+        '400':
+          $ref: '#/components/responses/InvalidOrderId'
+        '401':
+          $ref: '#/components/responses/AuthenticationRequired'
+        '404':
+          $ref: '#/components/responses/OrderNotFound'
+        '409':
+          $ref: '#/components/responses/OrderCancellationConflict'
+        '500':
+          $ref: '#/components/responses/OrderCancellationFailure'
+
 components:
   securitySchemes:
     sessionCookie:
@@ -154,6 +175,16 @@ components:
           schema: { $ref: '#/components/schemas/ApiError' }
     OrderCreationConflict:
       description: Selected items are missing, unavailable, or have insufficient stock
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiError' }
+    OrderCancellationConflict:
+      description: The current order or payment status does not allow cancellation or refund
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiError' }
+    OrderCancellationFailure:
+      description: Cancellation was rolled back because stock or money could not be restored
       content:
         application/json:
           schema: { $ref: '#/components/schemas/ApiError' }

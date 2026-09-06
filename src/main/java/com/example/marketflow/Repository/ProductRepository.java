@@ -28,4 +28,15 @@ public interface ProductRepository extends JpaRepository<ProductEntity,Long>{
             @Param("productId") Long productId,
             @Param("requestedQuantity") Integer requestedQuantity
     );
+
+    @Modifying
+    @Query(value = """
+            UPDATE products
+            SET quantity = quantity + :quantity
+            WHERE id = :productId
+            """, nativeQuery = true)
+    int increaseStock(
+            @Param("productId") Long productId,
+            @Param("quantity") Integer quantity
+    );
 }

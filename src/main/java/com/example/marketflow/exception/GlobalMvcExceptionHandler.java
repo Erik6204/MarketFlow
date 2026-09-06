@@ -137,6 +137,29 @@ public class GlobalMvcExceptionHandler {
         return "error";
     }
 
+    @ExceptionHandler({
+            InvalidOrderStateException.class,
+            RefundNotAvailableException.class
+    })
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public String handleInvalidOrderState(
+            RuntimeException exception,
+            Model model
+    ) {
+        model.addAttribute("message", exception.getMessage());
+        return "error";
+    }
+
+    @ExceptionHandler(OrderCancellationFailedException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public String handleOrderCancellationFailed(
+            OrderCancellationFailedException exception,
+            Model model
+    ) {
+        model.addAttribute("message", exception.getMessage());
+        return "error";
+    }
+
     @ExceptionHandler(OwnerWalletAccountNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public String handleOwnerWalletAccountNotFound(
