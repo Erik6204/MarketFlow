@@ -10,12 +10,15 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.marketflow.User.AuthenticatedUserDto;
 import com.example.marketflow.User.LoginRequest;
 import com.example.marketflow.User.RegisterRequest;
-import com.example.marketflow.User.ShowUserDto;
+import com.example.marketflow.security.MarketFlowPrincipal;
+import com.example.marketflow.security.SessionAuthenticationService;
 import com.example.marketflow.service.AuthService;
 
-import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.security.core.Authentication;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -23,6 +26,7 @@ import lombok.AllArgsConstructor;
 public class RestAuthController {
 
     private final AuthService authService;
+    private final SessionAuthenticationService sessionAuthenticationService;
 
     @PostMapping("/register")
     public ResponseEntity<Void> register(@Valid @RequestBody RegisterRequest request) {
@@ -33,19 +37,24 @@ public class RestAuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthenticatedUserDto> login(
             @Valid @RequestBody LoginRequest request,
-            HttpSession session
+            HttpServletRequest httpRequest,
+            HttpServletResponse httpResponse
     ) {
-        ShowUserDto user = authService.authenticate(request);
-        boolean seller = Boolean.TRUE.equals(authService.isSeller(user.getId()));
-
-        session.setAttribute("userId", user.getId());
-
-        return ResponseEntity.ok(AuthenticatedUserDto.from(user, seller));
+        MarketFlowPrincipal principal = sessionAuthenticationService.login(
+                request,
+                httpRequest,
+                httpResponse
+        );
+        return ResponseEntity.ok(principal.toAuthenticatedUserDto());
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(HttpSession session) {
-        session.invalidate();
+    public ResponseEntity<Void> logout(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            Authentication authentication
+    ) {
+        sessionAuthenticationService.logout(request, response, authentication);
         return ResponseEntity.noContent().build();
     }
 }

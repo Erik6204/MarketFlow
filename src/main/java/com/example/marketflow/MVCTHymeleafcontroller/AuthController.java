@@ -8,19 +8,27 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 import com.example.marketflow.User.LoginRequest;
 import com.example.marketflow.User.RegisterRequest;
-import com.example.marketflow.User.ShowUserDto;
+import com.example.marketflow.security.MarketFlowPrincipal;
+import com.example.marketflow.security.SessionAuthenticationService;
 import com.example.marketflow.service.AuthService;
 
-import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import org.springframework.security.core.Authentication;
 
 @Controller
 public class AuthController {
 
     private final AuthService authservice;
+    private final SessionAuthenticationService sessionAuthenticationService;
 
-    public AuthController(AuthService authservice) {
+    public AuthController(
+            AuthService authservice,
+            SessionAuthenticationService sessionAuthenticationService
+    ) {
         this.authservice = authservice;
+        this.sessionAuthenticationService = sessionAuthenticationService;
     }
 
     @GetMapping("/")
@@ -53,20 +61,33 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public String login(@Valid @ModelAttribute LoginRequest log,BindingResult bindingResult,HttpSession session)
+    public String login(
+            @Valid @ModelAttribute LoginRequest log,
+            BindingResult bindingResult,
+            HttpServletRequest request,
+            HttpServletResponse response
+    )
     {
         if (bindingResult.hasErrors()) {
             return "loginPage";
         }
-        ShowUserDto user=authservice.authenticate(log);
- 
-        session.setAttribute("userId", user.getId());
-        return authservice.isSeller(user.getId())?"redirect:/seller/account" : "redirect:/Buyer/account";
+        MarketFlowPrincipal principal = sessionAuthenticationService.login(
+                log,
+                request,
+                response
+        );
+        return principal.isSeller()
+                ? "redirect:/seller/account"
+                : "redirect:/Buyer/account";
     }
 
     @PostMapping("/logout")
-    public String logout(HttpSession session) {
-        session.invalidate();
+    public String logout(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            Authentication authentication
+    ) {
+        sessionAuthenticationService.logout(request, response, authentication);
         return "redirect:/";
     }
     

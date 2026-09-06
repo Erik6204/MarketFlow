@@ -1,9 +1,9 @@
 package com.example.marketflow.RestController;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import static org.mockito.Mockito.verify;
@@ -20,17 +20,16 @@ import org.springframework.mock.web.MockHttpSession;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.example.marketflow.AccountType;
-import com.example.marketflow.User.LoginRequest;
 import com.example.marketflow.User.RegisterRequest;
-import com.example.marketflow.User.ShowUserDto;
 import com.example.marketflow.User.UserStatus;
 import com.example.marketflow.exception.EmailAlreadyExistsException;
 import com.example.marketflow.exception.GlobalRestExceptionHandler;
 import com.example.marketflow.exception.InvalidCredentialsException;
+import com.example.marketflow.security.MarketFlowPrincipal;
+import com.example.marketflow.security.SessionAuthenticationService;
 import com.example.marketflow.service.AuthService;
 
 @WebMvcTest(RestAuthController.class)
@@ -42,6 +41,9 @@ public class RestAuthControllerTest {
 
     @MockitoBean
     private AuthService authService;
+
+    @MockitoBean
+    private SessionAuthenticationService sessionAuthenticationService;
 
     @Test
     void registerReturns201ForValidRequest() throws Exception {
@@ -134,16 +136,19 @@ public class RestAuthControllerTest {
     }
 
     @Test
-    void loginReturnsUserAndStoresUserIdInSession() throws Exception {
-        ShowUserDto user = new ShowUserDto(
+    void loginReturnsAuthenticatedUser() throws Exception {
+        var user = new com.example.marketflow.User.AuthenticatedUserDto(
                 7L,
                 "buyer@example.com",
                 UserStatus.ACTIVE,
-                "Ivan"
+                "Ivan",
+                false
         );
+        MarketFlowPrincipal principal = mock(MarketFlowPrincipal.class);
 
-        when(authService.authenticate(any(LoginRequest.class))).thenReturn(user);
-        when(authService.isSeller(7L)).thenReturn(false);
+        when(sessionAuthenticationService.login(any(), any(), any()))
+                .thenReturn(principal);
+        when(principal.toAuthenticatedUserDto()).thenReturn(user);
 
         mockMvc.perform(
                 post("/api/v1/auth/login")
@@ -156,20 +161,18 @@ public class RestAuthControllerTest {
                                 """)
         )
         .andExpect(status().isOk())
-        .andExpect(request().sessionAttribute("userId", 7L))
         .andExpect(jsonPath("$.id").value(7))
         .andExpect(jsonPath("$.email").value("buyer@example.com"))
         .andExpect(jsonPath("$.status").value("ACTIVE"))
         .andExpect(jsonPath("$.displayName").value("Ivan"))
         .andExpect(jsonPath("$.seller").value(false));
 
-        verify(authService).authenticate(any(LoginRequest.class));
-        verify(authService).isSeller(7L);
+        verify(sessionAuthenticationService).login(any(), any(), any());
     }
 
     @Test
     void loginReturns401ForInvalidCredentials() throws Exception {
-        when(authService.authenticate(any(LoginRequest.class)))
+        when(sessionAuthenticationService.login(any(), any(), any()))
                 .thenThrow(new InvalidCredentialsException());
 
         mockMvc.perform(
@@ -188,7 +191,7 @@ public class RestAuthControllerTest {
     }
 
     @Test
-    void logoutReturns204AndInvalidatesSession() throws Exception {
+    void logoutReturns204AndDelegatesToSessionSecurity() throws Exception {
         MockHttpSession session = new MockHttpSession();
         session.setAttribute("userId", 7L);
 
@@ -199,7 +202,6 @@ public class RestAuthControllerTest {
         .andExpect(status().isNoContent())
         .andExpect(content().string(""));
 
-        assertTrue(session.isInvalid());
-        verifyNoInteractions(authService);
+        verify(sessionAuthenticationService).logout(any(), any(), any());
     }
 }

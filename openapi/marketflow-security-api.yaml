@@ -1,0 +1,83 @@
+openapi: 3.0.3
+
+info:
+  title: MarketFlow Session Security API
+  version: 0.1.0
+  description: >
+    Session and CSRF contract shared by the MarketFlow REST APIs. Authentication
+    is stored server-side and represented in the browser by the JSESSIONID cookie.
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+paths:
+  /api/v1/csrf:
+    get:
+      tags: [Security]
+      summary: Obtain a CSRF token
+      operationId: getCsrfToken
+      security: []
+      responses:
+        '200':
+          description: CSRF token returned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CsrfToken'
+
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: JSESSIONID
+    csrfToken:
+      type: apiKey
+      in: header
+      name: X-CSRF-TOKEN
+
+  schemas:
+    CsrfToken:
+      type: object
+      required: [headerName, parameterName, token]
+      properties:
+        headerName:
+          type: string
+          example: X-CSRF-TOKEN
+        parameterName:
+          type: string
+          example: _csrf
+        token:
+          type: string
+          minLength: 1
+    ApiError:
+      type: object
+      required: [timestamp, status, code, message, path, validationErrors]
+      properties:
+        timestamp: { type: string, format: date-time }
+        status: { type: integer, format: int32 }
+        code: { type: string, enum: [AUTHENTICATION_REQUIRED, ACCESS_DENIED] }
+        message: { type: string }
+        path: { type: string }
+        validationErrors:
+          type: array
+          items:
+            type: object
+            required: [field, message]
+            properties:
+              field: { type: string }
+              message: { type: string }
+        traceId: { type: string, nullable: true }
+
+  responses:
+    AuthenticationRequired:
+      description: A valid authenticated HTTP session is required
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiError' }
+    AccessDenied:
+      description: The authenticated user does not have the required role
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ApiError' }

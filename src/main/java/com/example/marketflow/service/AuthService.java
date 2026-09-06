@@ -12,6 +12,7 @@ import com.example.marketflow.User.RegisterRequest;
 import com.example.marketflow.User.ShowUserDto;
 import com.example.marketflow.User.UserEntity;
 import com.example.marketflow.User.UserMapper;
+import com.example.marketflow.User.UserStatus;
 import com.example.marketflow.exception.EmailAlreadyExistsException;
 import com.example.marketflow.exception.InvalidCredentialsException;
 import com.example.marketflow.exception.UserNotFoundException;
@@ -67,6 +68,10 @@ public class AuthService {
         UserEntity user = userRepository
                 .findByEmailIgnoreCase(email)
                 .orElseThrow(InvalidCredentialsException::new);
+
+        if (user.getStatus() != UserStatus.ACTIVE) {
+            throw new InvalidCredentialsException();
+        }
 
         boolean passwordCorrect = passwordEncoder.matches(
                 log.getPassword(),
